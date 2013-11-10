@@ -11,3 +11,11 @@
 *.lai
 *.la
 *.a
+
+# Vim files
+*.un~
+*.swp
+*.swo
+
+# Build directory
+build/

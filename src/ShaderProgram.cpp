@@ -4,6 +4,7 @@
 #include <cmath>
 #include <GL/glew.h>
 #include "ShaderProgram.h"
+#include "ShaderException.h"
 
 ShaderProgram::ShaderProgram(const char *vertShaderPath, const char *fragShaderPath) {
     GLuint vertShader = glCreateShader(GL_VERTEX_SHADER);
@@ -17,6 +18,8 @@ ShaderProgram::ShaderProgram(const char *vertShaderPath, const char *fragShaderP
             vertShaderCode += "\n" + line;
         }
         vertShaderStream.close();
+    } else {
+        throw ShaderException(std::string("Could not open file ") + vertShaderPath);
     }
 
     std::string fragShaderCode;
@@ -27,6 +30,8 @@ ShaderProgram::ShaderProgram(const char *vertShaderPath, const char *fragShaderP
             fragShaderCode += "\n" + line;
         }
         fragShaderStream.close();
+    } else {
+        throw ShaderException(std::string("Could not open file ") + fragShaderPath);
     }
     
     GLint compileResult = GL_FALSE;
@@ -39,10 +44,12 @@ ShaderProgram::ShaderProgram(const char *vertShaderPath, const char *fragShaderP
 
 
     glGetShaderiv(vertShader, GL_COMPILE_STATUS, &compileResult);
-    glGetShaderiv(vertShader, GL_INFO_LOG_LENGTH, &infoLogLength);
-    std::vector<char> vertShaderErrorMessage(infoLogLength);
-    glGetShaderInfoLog(vertShader, infoLogLength, NULL, &vertShaderErrorMessage[0]);
-    printf("%s\n", &vertShaderErrorMessage[0]);
+    if(compileResult == GL_FALSE) {
+        glGetShaderiv(vertShader, GL_INFO_LOG_LENGTH, &infoLogLength);
+        std::vector<char> vertShaderErrorMessage(infoLogLength);
+        glGetShaderInfoLog(vertShader, infoLogLength, NULL, &vertShaderErrorMessage[0]);
+        throw ShaderException(std::string("Error compiling vertex shader: ") + &vertShaderErrorMessage[0]);
+    }
 
 
 
@@ -52,10 +59,12 @@ ShaderProgram::ShaderProgram(const char *vertShaderPath, const char *fragShaderP
     glCompileShader(fragShader);
 
     glGetShaderiv(fragShader, GL_COMPILE_STATUS, &compileResult);
-    glGetShaderiv(fragShader, GL_INFO_LOG_LENGTH, &infoLogLength);
-    std::vector<char> fragShaderErrorMessage(infoLogLength);
-    glGetShaderInfoLog(fragShader, infoLogLength, NULL, &fragShaderErrorMessage[0]);
-    printf("%s\n", &fragShaderErrorMessage[0]);
+    if(compileResult == GL_FALSE) {
+        glGetShaderiv(fragShader, GL_INFO_LOG_LENGTH, &infoLogLength);
+        std::vector<char> fragShaderErrorMessage(infoLogLength);
+        glGetShaderInfoLog(fragShader, infoLogLength, NULL, &fragShaderErrorMessage[0]);
+        throw ShaderException(std::string("Error compiling fragment shader: ") + &fragShaderErrorMessage[0]);
+    }
 
     printf("Linking program\n");
     program = glCreateProgram();
@@ -64,13 +73,16 @@ ShaderProgram::ShaderProgram(const char *vertShaderPath, const char *fragShaderP
     glLinkProgram(program);
 
     glGetProgramiv(program, GL_LINK_STATUS, &compileResult);
-    glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
-    std::vector<char> programErrorMessage(std::max(infoLogLength, int(1)));
-    glGetProgramInfoLog(program, infoLogLength, NULL, &programErrorMessage[0]);
-    printf("%s\n", &programErrorMessage[0]);
+    if(compileResult == GL_FALSE) {
+        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
+        std::vector<char> programErrorMessage(std::max(infoLogLength, int(1)));
+        glGetProgramInfoLog(program, infoLogLength, NULL, &programErrorMessage[0]);
+        throw ShaderException(std::string("Error linking shader program: ") + &programErrorMessage[0]);
+    }
 
     glDeleteShader(vertShader);
     glDeleteShader(fragShader);
+
 }
 
 GLuint ShaderProgram::getProgram() {

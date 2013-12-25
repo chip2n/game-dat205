@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 2.8)
-project(test)
+# Set the include folder
+include_directories(${CMAKE_SOURCE_DIR}/include)
 
-add_executable(test ${SOURCE_DIR}/test.cpp ${SOURCE_DIR}/ShaderProgram.cpp)
-target_link_libraries(test ${GLFW} ${OPENGL_LIBRARIES} ${GLEW_LIBRARY})
+add_executable(RenderEngine test.cpp ShaderProgram.cpp)
+target_link_libraries(RenderEngine ${GLFW} ${OPENGL_LIBRARIES} ${GLEW_LIBRARY})

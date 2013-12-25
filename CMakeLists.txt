@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(game)
+project(RenderEngine)
 
 # Set the external library folder
 set(LIBRARIES ${CMAKE_SOURCE_DIR}/libs)

@@ -50,9 +50,12 @@ int main(int argc, const char *argv[]) {
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
     
-    ShaderProgram program("hej", "hej");
+    ShaderProgram shaderProgram("simple.vert", "simple.frag");
 
 	while(!glfwWindowShouldClose(window)) {
+        glUseProgram(shaderProgram.getProgram());
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);

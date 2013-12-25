@@ -10,13 +10,15 @@ set(SOURCE_DIR ${CMAKE_SOURCE_DIR}/src)
 
 # Find OpenGL and include its headers
 find_package(OpenGL REQUIRED)
-find_package(GLEW REQUIRED)
+
 include_directories(${OPENGL_INCLUDE_DIRS})
 
 # Find GLFW amongst our external libraries
 if(WIN32)
+    find_library(GLEW_LIBRARY NAMES glew32.lib PATHS ${LIBRARIES})
     find_library(GLFW NAMES glfw3.lib PATHS ${LIBRARIES})
 else(WIN32)
+    find_package(GLEW REQUIRED)
     find_package(PkgConfig REQUIRED)
     pkg_search_module(GLFW REQUIRED glfw)
     set(GLFW "glfw")

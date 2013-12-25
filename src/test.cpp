@@ -1,5 +1,14 @@
 #include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <GL/glew.h>
 #include <GLFW/glfw3.h>
+
+static const GLfloat triangle[] = {
+    -1.0f, -1.0f, 0.0f,
+    1.0f, -1.0f, 0.0f,
+    0.0f, 1.0f, 0.0f
+};
 
 
 void error_callback(int error, const char* description) {
@@ -28,7 +37,24 @@ int main(int argc, const char *argv[]) {
 	glfwSetKeyCallback(window, key_callback);
 	glfwMakeContextCurrent(window);
 
+
+    /* TEST RENDER TRIANGLE */
+    glewInit();
+    GLuint vao;
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    GLuint vbo;
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
+
 	while(!glfwWindowShouldClose(window)) {
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, vbo);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDisableVertexAttribArray(0);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}

@@ -20,11 +20,10 @@ if(WIN32)
 else(WIN32)
     find_package(GLEW REQUIRED)
     find_package(PkgConfig REQUIRED)
-    pkg_search_module(GLFW REQUIRED glfw)
+#pkg_search_module(GLFW REQUIRED glfw)
     set(GLFW "glfw")
 endif(WIN32)
 
 set(CMAKE_CXX_FLAGS "-g -Wall")
 
-add_executable(test ${SOURCE_DIR}/test.cpp)
-target_link_libraries(test ${GLFW} ${OPENGL_LIBRARIES} ${GLEW_LIBRARY})
+add_subdirectory(${SOURCE_DIR})

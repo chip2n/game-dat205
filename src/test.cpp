@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include "ShaderProgram.h"
 
 static const GLfloat triangle[] = {
     -1.0f, -1.0f, 0.0f,
@@ -48,6 +49,8 @@ int main(int argc, const char *argv[]) {
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
+    
+    ShaderProgram program("hej", "hej");
 
 	while(!glfwWindowShouldClose(window)) {
         glEnableVertexAttribArray(0);

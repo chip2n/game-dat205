@@ -3,6 +3,7 @@
 #include <vector>
 #include <cmath>
 #include <GL/glew.h>
+#include <glm/glm.hpp>
 #include "ShaderProgram.h"
 #include "ShaderException.h"
 
@@ -87,4 +88,22 @@ ShaderProgram::ShaderProgram(const char *vertShaderPath, const char *fragShaderP
 
 GLuint ShaderProgram::getProgram() {
     return program;
+}
+
+void ShaderProgram::begin() {
+    active = true;
+    glUseProgram(program);
+}
+
+void ShaderProgram::end() {
+    active = false;
+    glUseProgram(0);
+}
+
+void ShaderProgram::setUniform(const char* location, glm::mat4 mat) {
+    if(!active) {
+        throw ShaderException("You need to call ShaderProgram.begin() before assigning uniforms.");
+    }
+    GLuint m = glGetUniformLocation(program, location);
+    glUniformMatrix4fv(m, 1, GL_FALSE, &mat[0][0]);
 }

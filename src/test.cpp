@@ -7,12 +7,6 @@
 #include "ShaderProgram.h"
 #include "Camera.h"
 
-static const GLfloat triangle[] = {
-    -1.0f, -1.0f, 0.0f,
-    1.0f, -1.0f, 0.0f,
-    0.0f, 1.0f, 0.0f
-};
-
 
 void error_callback(int error, const char* description) {
 	fputs(description, stderr);
@@ -24,6 +18,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 }
 
 int main(int argc, const char *argv[]) {
+
 	GLFWwindow* window;
 	glfwSetErrorCallback(error_callback);
 
@@ -40,37 +35,45 @@ int main(int argc, const char *argv[]) {
 	glfwSetKeyCallback(window, key_callback);
 	glfwMakeContextCurrent(window);
 
+    if(glewInit() != GLEW_OK) {
+        exit(EXIT_FAILURE);
+    }
+
+    // Load shader
+    ShaderProgram shaderProgram("simple.vert", "simple.frag");
+
+    // Init camera at position (2,3,3) looking at origin
+    Camera camera(45.0f, 640, 480);
+    camera.setPosition(glm::vec3(2,3,3));
+    camera.lookAt(glm::vec3(0,0,0));
+    camera.update();
 
     /* TEST RENDER TRIANGLE */
-    glewInit();
+    const GLfloat triangle[] = {
+        -1.0f, -1.0f, 0.0f,
+        1.0f, -1.0f, 0.0f,
+        0.0f, 1.0f, 0.0f
+    };
     GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
-
     GLuint vbo;
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
-    
-    ShaderProgram shaderProgram("simple.vert", "simple.frag");
-    Camera camera(45.0f, 640, 480);
-    camera.setPosition(glm::vec3(2,3,3));
-    camera.lookAt(glm::vec3(0,1,0));
-    camera.update();
-
-    GLuint m = glGetUniformLocation(shaderProgram.getProgram(), "modelViewProjectionMatrix");
-    glm::mat4 mvp = camera.getCombinedMatrix();
-
 
 	while(!glfwWindowShouldClose(window)) {
-        glUseProgram(shaderProgram.getProgram());
-        glUniformMatrix4fv(m, 1, GL_FALSE, &mvp[0][0]);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+
+        shaderProgram.begin();
+        shaderProgram.setUniform("modelViewProjectionMatrix", camera.getCombinedMatrix());
         glDrawArrays(GL_TRIANGLES, 0, 3);
+        shaderProgram.end();
+
         glDisableVertexAttribArray(0);
 		glfwSwapBuffers(window);
 		glfwPollEvents();

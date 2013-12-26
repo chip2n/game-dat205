@@ -3,7 +3,9 @@
 #include <cstdlib>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
 #include "ShaderProgram.h"
+#include "Camera.h"
 
 static const GLfloat triangle[] = {
     -1.0f, -1.0f, 0.0f,
@@ -51,9 +53,18 @@ int main(int argc, const char *argv[]) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
     
     ShaderProgram shaderProgram("simple.vert", "simple.frag");
+    Camera camera(45.0f, 640, 480);
+    camera.setPosition(glm::vec3(2,3,3));
+    camera.lookAt(glm::vec3(0,1,0));
+    camera.update();
+
+    GLuint m = glGetUniformLocation(shaderProgram.getProgram(), "modelViewProjectionMatrix");
+    glm::mat4 mvp = camera.getCombinedMatrix();
+
 
 	while(!glfwWindowShouldClose(window)) {
         glUseProgram(shaderProgram.getProgram());
+        glUniformMatrix4fv(m, 1, GL_FALSE, &mvp[0][0]);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glEnableVertexAttribArray(0);

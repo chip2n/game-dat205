@@ -67,6 +67,10 @@ static void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     lastY = ypos;
 }
 
+static void resize_callback(GLFWwindow* window, int width, int height) {
+    glViewport(0, 0, width, height);
+}
+
 int main(int argc, const char *argv[]) {
 	GLFWwindow* window;
 	glfwSetErrorCallback(error_callback);
@@ -83,6 +87,7 @@ int main(int argc, const char *argv[]) {
 
 	glfwSetKeyCallback(window, key_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
+    glfwSetWindowSizeCallback(window, resize_callback);
 	glfwMakeContextCurrent(window);
 
     if(glewInit() != GLEW_OK) {
@@ -98,6 +103,7 @@ int main(int argc, const char *argv[]) {
     camera.update();
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
     /* TEST RENDER TRIANGLE */
     const GLfloat triangle[] = {
         -1.0f, -1.0f, 0.0f,
@@ -142,4 +148,3 @@ int main(int argc, const char *argv[]) {
 	glfwDestroyWindow(window);
 	glfwTerminate();
 }
-

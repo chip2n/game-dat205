@@ -10,10 +10,14 @@ class Camera {
         void lookAt(glm::vec3 point);
         void move(glm::vec3 vec);
         void update();
+        void rotate(glm::vec3 axis, float angle);
         glm::mat4 getProjectionMatrix();
         glm::mat4 getViewMatrix();
         glm::mat4 getCombinedMatrix();
         void setPosition(glm::vec3 position);
+        glm::vec3 getDirection();
+        glm::vec3 getRight();
+        glm::vec3 getUp();
     private:
         glm::vec3 position;
         glm::mat4 projection;

@@ -1,3 +1,4 @@
+#include <glm/gtx/rotate_vector.hpp>
 #include "Camera.h"
 
 Camera::Camera(float fov, float viewportWidth, float viewportHeight) {
@@ -37,4 +38,25 @@ void Camera::lookAt(glm::vec3 point) {
 
 void Camera::setPosition(glm::vec3 p) {
     position = p;
+}
+
+void Camera::move(glm::vec3 vec) {
+    position += vec;
+}
+
+void Camera::rotate(glm::vec3 axis, float angle) {
+    direction = glm::rotate(direction, angle, axis);
+    up = glm::rotate(up, angle, axis);
+}
+
+glm::vec3 Camera::getDirection() {
+    return direction;
+}
+
+glm::vec3 Camera::getRight() {
+    return glm::cross(direction, up);
+}
+
+glm::vec3 Camera::getUp() {
+    return up;
 }

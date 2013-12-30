@@ -6,6 +6,7 @@
 #include <glm/glm.hpp>
 #include "ShaderProgram.h"
 #include "Camera.h"
+#include "Room.h"
 
 Camera camera(45.0f, 640, 480);
 
@@ -23,7 +24,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         if(action == GLFW_PRESS || action == GLFW_REPEAT) {
             movementDirection.y = 1;
         } else {
-            std::cout << "release" << std::endl;
             movementDirection.y = 0;
         }
     }
@@ -31,7 +31,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         if(action == GLFW_PRESS || action == GLFW_REPEAT) {
             movementDirection.y = -1;
         } else {
-            std::cout << "release" << std::endl;
             movementDirection.y = 0;
         }
     }
@@ -39,7 +38,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         if(action == GLFW_PRESS || action == GLFW_REPEAT) {
             movementDirection.x = -1;
         } else {
-            std::cout << "release" << std::endl;
             movementDirection.x = 0;
         }
     }
@@ -47,7 +45,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         if(action == GLFW_PRESS || action == GLFW_REPEAT) {
             movementDirection.x = 1;
         } else {
-            std::cout << "release" << std::endl;
             movementDirection.x = 0;
         }
     }
@@ -58,7 +55,6 @@ static void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     double deltaX = xpos - lastX;
     double deltaY = ypos - lastY;
 
-    std::cout << "x: " << deltaX << ", y: " << deltaY << std::endl;
     camera.rotate(glm::vec3(0,1,0), -deltaX/10);
     camera.rotate(camera.getRight(), -deltaY/10);
     camera.update();
@@ -104,19 +100,13 @@ int main(int argc, const char *argv[]) {
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    /* TEST RENDER TRIANGLE */
-    const GLfloat triangle[] = {
-        -1.0f, -1.0f, 0.0f,
-        1.0f, -1.0f, 0.0f,
-        0.0f, 1.0f, 0.0f
-    };
     GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     GLuint vbo;
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(triangle), triangle, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(room), room, GL_STATIC_DRAW);
 
     double lastTime = glfwGetTime();
     double deltaTime = lastTime;
@@ -130,17 +120,22 @@ int main(int argc, const char *argv[]) {
         camera.update();
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        glEnable(GL_DEPTH_TEST);
 
         glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
 
         shaderProgram.begin();
         shaderProgram.setUniform("modelViewProjectionMatrix", camera.getCombinedMatrix());
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, 9);
         shaderProgram.end();
 
+        glDisable(GL_DEPTH_TEST);
         glDisableVertexAttribArray(0);
+        glDisableVertexAttribArray(1);
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}

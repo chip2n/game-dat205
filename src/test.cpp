@@ -7,6 +7,7 @@
 #include "ShaderProgram.h"
 #include "Camera.h"
 #include "Room.h"
+#include "OBJLoader.h"
 
 Camera camera(45.0f, 640, 480);
 
@@ -100,17 +101,19 @@ int main(int argc, const char *argv[]) {
 
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
+    OBJLoader loader;
+    std::vector<glm::vec3> obj = loader.loadOBJ("cube.obj");
+
     GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
     GLuint vbo;
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(room), room, GL_STATIC_DRAW);
-
+    glBufferData(GL_ARRAY_BUFFER, obj.size()*sizeof(glm::vec3), &obj[0], GL_STATIC_DRAW);
+    
     double lastTime = glfwGetTime();
     double deltaTime = lastTime;
-
 	while(!glfwWindowShouldClose(window)) {
         deltaTime = glfwGetTime() - lastTime;
         lastTime = glfwGetTime();
@@ -123,14 +126,14 @@ int main(int argc, const char *argv[]) {
         glEnable(GL_DEPTH_TEST);
 
         glEnableVertexAttribArray(0);
-        glEnableVertexAttribArray(1);
+        //glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)0);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0*sizeof(float), (void*)0);
+        //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
 
         shaderProgram.begin();
         shaderProgram.setUniform("modelViewProjectionMatrix", camera.getCombinedMatrix());
-        glDrawArrays(GL_TRIANGLES, 0, 9);
+        glDrawArrays(GL_TRIANGLES, 0, 12*3);
         shaderProgram.end();
 
         glDisable(GL_DEPTH_TEST);

@@ -23,6 +23,6 @@ else(WIN32)
     set(GLFW "glfw")
 endif(WIN32)
 
-set(CMAKE_CXX_FLAGS "-g -Wall")
+set(CMAKE_CXX_FLAGS " -std=c++0x -g -Wall")
 
 add_subdirectory(${SOURCE_DIR})

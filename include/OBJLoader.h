@@ -6,9 +6,10 @@
 
 class OBJLoader {
     public:
-        std::vector<glm::vec3> loadOBJ(std::string path);
+        void loadOBJ(std::string path, std::vector<glm::vec3> &vertices, std::vector<glm::vec2> &texCoords);
     private:
         glm::vec3 readVertex(std::string line);
+        glm::vec2 readTexCoord(std::string line);
 };
 
 #endif

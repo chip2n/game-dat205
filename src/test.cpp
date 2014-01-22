@@ -102,7 +102,10 @@ int main(int argc, const char *argv[]) {
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     OBJLoader loader;
-    std::vector<glm::vec3> obj = loader.loadOBJ("cube.obj");
+    //std::vector<glm::vec3> obj = loader.loadOBJ("cube.obj");
+    std::vector<glm::vec3> obj;
+    std::vector<glm::vec2> texCoords;
+    loader.loadOBJ("cube.obj", obj, texCoords);
 
     GLuint vao;
     glGenVertexArrays(1, &vao);

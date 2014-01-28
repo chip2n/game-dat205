@@ -22,12 +22,13 @@ void OBJLoader::loadOBJ(
     while(std::getline(file, line)) {
         switch(line[0]) {
         case 'v':
-            if(line[1] == ' ')
+            if(line[1] == ' ') {
                 vertices.push_back(readVertex(line));
-            else if(line[1] == 't')
+            } else if(line[1] == 't') {
                 texCoords.push_back(readTexCoord(line));
-            else if(line[1] == 'n')
+            } else if(line[1] == 'n') {
                 normals.push_back(readVertex(line));
+            }
             break;
         case 'f':
             line.erase(0, line.find(' ') + 1);
@@ -38,7 +39,6 @@ void OBJLoader::loadOBJ(
                 int texCoordIndex;
                 int normalIndex;
                 sscanf(line.c_str(), "%d/%d/%d", &vertexIndex, &texCoordIndex, &normalIndex);
-                std::cout << vertexIndex << "/" << texCoordIndex << "/" << normalIndex << std::endl;
                 line.erase(0, line.find(' ') + 1);
                 
                 // Our indices are 0-based
@@ -63,7 +63,6 @@ glm::vec3 OBJLoader::readVertex(std::string line) {
     float y = std::stof(line.substr(0, line.find(' ')));
     line.erase(0, line.find(' ') + 1);
     float z = std::stof(line.substr(0, line.find(' ')));
-
     return glm::vec3(x,y,z);
 }
 

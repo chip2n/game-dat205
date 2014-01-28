@@ -9,6 +9,7 @@ class ShaderProgram {
         void begin();
         void end();
         void setUniform(const char *location, glm::mat4 mat);
+        void setUniform(const char *location, glm::vec3 vec);
     private:
         GLuint program;
         bool active;

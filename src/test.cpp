@@ -105,7 +105,8 @@ int main(int argc, const char *argv[]) {
     //std::vector<glm::vec3> obj = loader.loadOBJ("cube.obj");
     std::vector<glm::vec3> obj;
     std::vector<glm::vec2> texCoords;
-    loader.loadOBJ("cube.obj", obj, texCoords);
+    std::vector<glm::vec3> normals;
+    loader.loadOBJ("cube.obj", obj, texCoords, normals);
 
     GLuint vao;
     glGenVertexArrays(1, &vao);

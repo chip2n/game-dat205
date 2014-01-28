@@ -6,9 +6,15 @@
 #include "OBJLoader.h"
 #include <stdio.h>
 
-void OBJLoader::loadOBJ(std::string path, std::vector<glm::vec3> &outVertices, std::vector<glm::vec2> &outTexCoords) {
+void OBJLoader::loadOBJ(
+        std::string path,
+        std::vector<glm::vec3> &outVertices,
+        std::vector<glm::vec2> &outTexCoords,
+        std::vector<glm::vec3> &outNormals
+) {
     std::vector<glm::vec3> vertices;
     std::vector<glm::vec2> texCoords;
+    std::vector<glm::vec3> normals;
 
     std::ifstream file(path.c_str());
 
@@ -20,6 +26,8 @@ void OBJLoader::loadOBJ(std::string path, std::vector<glm::vec3> &outVertices, s
                 vertices.push_back(readVertex(line));
             else if(line[1] == 't')
                 texCoords.push_back(readTexCoord(line));
+            else if(line[1] == 'n')
+                normals.push_back(readVertex(line));
             break;
         case 'f':
             line.erase(0, line.find(' ') + 1);
@@ -40,6 +48,7 @@ void OBJLoader::loadOBJ(std::string path, std::vector<glm::vec3> &outVertices, s
 
                 outVertices.push_back(vertices[vertexIndex]);
                 outTexCoords.push_back(texCoords[texCoordIndex]);
+                outNormals.push_back(normals[normalIndex]);
             }
 
             break;

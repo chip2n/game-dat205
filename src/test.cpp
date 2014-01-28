@@ -4,6 +4,7 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
+#include <SOIL.h>
 #include "ShaderProgram.h"
 #include "Camera.h"
 #include "Room.h"
@@ -92,7 +93,7 @@ int main(int argc, const char *argv[]) {
     }
 
     // Load shader
-    ShaderProgram shaderProgram("simple.vert", "simple.frag");
+    ShaderProgram shaderProgram("simpletex.vert", "simpletex.frag");
 
     // Init camera at position (2,3,3) looking at origin
     camera.setPosition(glm::vec3(2,3,3));
@@ -108,6 +109,13 @@ int main(int argc, const char *argv[]) {
     std::vector<glm::vec3> normals;
     loader.loadOBJ("cube.obj", obj, texCoords, normals);
 
+    // Load a texture
+    GLuint tex = SOIL_load_OGL_texture ("bricks.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT);
+    if(0 == tex) {
+        std::cout << "Error loading texture." << std::endl;
+    }
+
+
     GLuint vao;
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
@@ -115,6 +123,12 @@ int main(int argc, const char *argv[]) {
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, obj.size()*sizeof(glm::vec3), &obj[0], GL_STATIC_DRAW);
+
+    GLuint texCoordsBuffer;
+    glGenBuffers(1, &texCoordsBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, texCoordsBuffer);
+    glBufferData(GL_ARRAY_BUFFER, texCoords.size()*sizeof(glm::vec2), &texCoords[0], GL_STATIC_DRAW);
+
     
     double lastTime = glfwGetTime();
     double deltaTime = lastTime;
@@ -128,12 +142,18 @@ int main(int argc, const char *argv[]) {
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_BACK);
+
+        glBindTexture(GL_TEXTURE_2D, tex);
 
         glEnableVertexAttribArray(0);
-        //glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0*sizeof(float), (void*)0);
-        //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6*sizeof(float), (void*)(3*sizeof(float)));
+
+        glEnableVertexAttribArray(1);
+        glBindBuffer(GL_ARRAY_BUFFER, texCoordsBuffer);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0*sizeof(float), (void*)0);
 
         shaderProgram.begin();
         shaderProgram.setUniform("modelViewProjectionMatrix", camera.getCombinedMatrix());

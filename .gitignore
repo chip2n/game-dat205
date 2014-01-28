@@ -19,3 +19,7 @@
 
 # Build directory
 build/
+
+# Blender shit
+*.blend1
+*.blend2

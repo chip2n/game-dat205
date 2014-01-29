@@ -7,11 +7,12 @@ uniform sampler2D texSampler;
 uniform vec3 lightPos;
 
 void main() {
-    vec3 l = vec3(10, 0, 0);
-    vec3 lightDir = normalize(l - worldPosition);
+    vec3 lightDir = normalize(lightPos - worldPosition);
     float theta = dot(outNormal, lightDir);
 
     vec3 c = texture(texSampler, texCoords).rgb;
 
-    color = (vec3(0.1, 0.1, 0.1) + theta) * 10 * c;
+    vec3 diffuse = vec3(0.5, 0.5, 0.5)*theta;
+    vec3 ambient = vec3(0.1, 0.1, 0.1);
+    color = (ambient + diffuse) * c;
 }

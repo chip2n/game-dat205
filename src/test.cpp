@@ -108,7 +108,6 @@ int main(int argc, const char *argv[]) {
     camera.lookAt(glm::vec3(0,0,0));
     camera.update();
 
-
     OBJLoader loader;
     std::vector<glm::vec3> obj;
     std::vector<glm::vec2> texCoords;
@@ -141,10 +140,10 @@ int main(int argc, const char *argv[]) {
     GLuint normalsBuffer;
     glGenBuffers(1, &normalsBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
-    glBufferData(GL_ARRAY_BUFFER, normals.size()*sizeof(glm::vec2), &normals[0], GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, normals.size()*sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
 
     // Let's create a light for great glory, yo
-    glm::vec3 lightPos = glm::vec3(10, 0, 0);
+    glm::vec3 lightPos = glm::vec3(10, 4, 2);
 
     double lastTime = glfwGetTime();
     double deltaTime = lastTime;

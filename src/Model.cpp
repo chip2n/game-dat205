@@ -1,0 +1,70 @@
+#include <iostream>
+#include <vector>
+#include <GL/glew.h>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include <glm/glm.hpp>
+#include "Model.h"
+
+bool Model::loadFromFile(char* path) {
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile(path,
+            aiProcess_CalcTangentSpace |
+            aiProcess_Triangulate |
+            aiProcess_JoinIdenticalVertices |
+            aiProcess_SortByPType);
+
+    if(!scene) {
+        std::cout << "WFEGFD" << std::endl;
+        return false;
+    }
+
+    for(int i = 0; i < scene->mNumMeshes; ++i) {
+        aiMesh* mesh = scene->mMeshes[i];
+
+        for(int j = 0; j < mesh->mNumFaces; ++j) {
+            const aiFace& face = mesh->mFaces[j];
+
+            for(int k = 0; k < 3; ++k) {
+                aiVector3D pos = mesh->mVertices[face.mIndices[k]];
+                aiVector3D uv = mesh->mTextureCoords[0][face.mIndices[k]];
+                aiVector3D normal = mesh->HasNormals() ? mesh->mNormals[face.mIndices[k]] : aiVector3D(1.0f, 1.0f, 1.0f);
+
+
+                positions.push_back(glm::vec3(pos.x, pos.y, pos.z));
+                normals.push_back(glm::vec3(normal.x, normal.y, normal.z));
+                texCoords.push_back(glm::vec2(uv.x, uv.y));
+
+                test.push_back(pos.x);
+                test.push_back(pos.y);
+                test.push_back(pos.z);
+                test.push_back(uv.x);
+                test.push_back(uv.y);
+                test.push_back(normal.x);
+                test.push_back(normal.y);
+                test.push_back(normal.z);
+
+            }
+        }
+    }
+
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
+
+    // Generate some of the buffers yo
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
+    glBufferData(GL_ARRAY_BUFFER, test.size()*sizeof(float), &test[0], GL_STATIC_DRAW);
+
+    glEnableVertexAttribArray(0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)0);
+
+    glEnableVertexAttribArray(1);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*) (3*sizeof(float)));
+
+    glEnableVertexAttribArray(2);
+    glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*) (5*sizeof(float)));
+
+    return true;
+}

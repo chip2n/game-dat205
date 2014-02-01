@@ -17,11 +17,13 @@ if(WIN32)
     find_library(GLEW_LIBRARY NAMES glew32.lib PATHS ${LIBRARIES})
     find_library(GLFW NAMES glfw3.lib PATHS ${LIBRARIES})
     find_library(SOIL NAMES libSOIL.lib PATHS ${LIBRARIES})
+    # TODO: Add assimp
 else(WIN32)
     find_package(GLEW REQUIRED)
     find_package(PkgConfig REQUIRED)
     set(GLFW "glfw")
     set(SOIL "SOIL")
+    set(ASSIMP "assimp")
 endif(WIN32)
 
 set(CMAKE_CXX_FLAGS " -std=c++0x -g -Wall")

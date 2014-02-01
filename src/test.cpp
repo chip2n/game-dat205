@@ -9,9 +9,101 @@
 #include "Camera.h"
 #include "Room.h"
 #include "OBJLoader.h"
+#include "Model.h"
+#include "ModelInstance.h"
+
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
 
 Camera camera(45.0f, 640, 480);
 
+struct MyMesh {
+    unsigned int numFaces;
+    GLuint vao;
+};
+std::vector<MyMesh> meshes;
+
+void processScene(const aiScene *sc) {
+    MyMesh aMesh;
+    GLuint buffer;
+
+    for(unsigned int n = 0; n < sc->mNumMeshes; ++n) {
+        const aiMesh* mesh = sc->mMeshes[n];
+
+        unsigned int *faceArray;
+        faceArray = (unsigned int *)malloc(sizeof(unsigned int) * mesh->mNumFaces * 3);
+        unsigned int faceIndex = 0;
+
+        for(unsigned int t = 0; t < mesh->mNumFaces; ++t) {
+            const aiFace* face = &mesh->mFaces[t];
+
+            memcpy(&faceArray[faceIndex], face->mIndices, 3*sizeof(unsigned int));
+            faceIndex+=3;
+        }
+        aMesh.numFaces = sc->mMeshes[n]->mNumFaces;
+
+        glGenVertexArrays(1, &(aMesh.vao));
+        glBindVertexArray(aMesh.vao);
+
+        glGenBuffers(1, &buffer);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * mesh->mNumFaces * 3, faceArray, GL_STATIC_DRAW);
+
+        if(mesh->HasPositions()) {
+            glGenBuffers(1, &buffer);
+            glBindBuffer(GL_ARRAY_BUFFER, buffer);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(float)*3*mesh->mNumVertices, mesh->mVertices, GL_STATIC_DRAW);
+            glEnableVertexAttribArray(0);  //TODO: Rätt?
+            glVertexAttribPointer(0, 3, GL_FLOAT, 0, 0, 0);
+        }
+
+        if(mesh->HasNormals()) {
+            glGenBuffers(1, &buffer);
+            glBindBuffer(GL_ARRAY_BUFFER, buffer);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(float)*3*mesh->mNumVertices, mesh->mNormals, GL_STATIC_DRAW);
+            glEnableVertexAttribArray(2);  //TODO: Rätt?
+            glVertexAttribPointer(2, 3, GL_FLOAT, 0, 0, 0);
+        }
+
+        if(mesh->HasTextureCoords(0)) {
+            float *texCoords = (float*)malloc(sizeof(float)*2*mesh->mNumVertices);
+            for(unsigned int k = 0; k < mesh->mNumVertices; ++k) {
+                texCoords[k*2] = mesh->mTextureCoords[0][k].x;
+                texCoords[k*2+1] = mesh->mTextureCoords[0][k].y;
+            }
+            glGenBuffers(1, &buffer);
+            glBindBuffer(GL_ARRAY_BUFFER, buffer);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(float)*2*mesh->mNumVertices, texCoords, GL_STATIC_DRAW);
+            glEnableVertexAttribArray(1);  //TODO: Rätt?
+            glVertexAttribPointer(1, 2, GL_FLOAT, 0, 0, 0);
+        }
+
+        glBindVertexArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+
+        meshes.push_back(aMesh);
+    }
+}
+
+bool assimpImport(const std::string &pFile) {
+    Assimp::Importer importer;
+    const aiScene* scene = importer.ReadFile( pFile,
+            aiProcess_CalcTangentSpace |
+            aiProcess_Triangulate |
+            aiProcess_JoinIdenticalVertices |
+            aiProcess_SortByPType);
+
+    if(!scene) {
+        std::cout << "WFEGFD" << std::endl;
+        return false;
+    }
+
+    processScene(scene);
+
+    return true;
+}
 
 void error_callback(int error, const char* description) {
 	fputs(description, stderr);
@@ -100,6 +192,7 @@ int main(int argc, const char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
+
     // Load shaders, yo
     ShaderProgram shaderProgram("simpleshading.vert", "simpleshading.frag");
 
@@ -112,7 +205,16 @@ int main(int argc, const char *argv[]) {
     std::vector<glm::vec3> obj;
     std::vector<glm::vec2> texCoords;
     std::vector<glm::vec3> normals;
+    /*
     loader.loadOBJ("cube.obj", obj, texCoords, normals);
+    */
+
+    Model model;
+    model.loadFromFile("cube.obj");
+    ModelInstance modelInstance(&model);
+    obj = model.positions;
+    texCoords = model.texCoords;
+    normals = model.normals;
 
     // Load a texture using SOIL, yo
     GLuint tex = SOIL_load_OGL_texture ("bricks.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT);
@@ -120,27 +222,6 @@ int main(int argc, const char *argv[]) {
         std::cout << "Error loading texture." << std::endl;
     }
 
-
-    // Create the VAO for all them shader sauces, yo
-    GLuint vao;
-    glGenVertexArrays(1, &vao);
-    glBindVertexArray(vao);
-
-    // Generate some of the buffers yo
-    GLuint positionBuffer;
-    glGenBuffers(1, &positionBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
-    glBufferData(GL_ARRAY_BUFFER, obj.size()*sizeof(glm::vec3), &obj[0], GL_STATIC_DRAW);
-
-    GLuint texCoordsBuffer;
-    glGenBuffers(1, &texCoordsBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, texCoordsBuffer);
-    glBufferData(GL_ARRAY_BUFFER, texCoords.size()*sizeof(glm::vec2), &texCoords[0], GL_STATIC_DRAW);
-
-    GLuint normalsBuffer;
-    glGenBuffers(1, &normalsBuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
-    glBufferData(GL_ARRAY_BUFFER, normals.size()*sizeof(glm::vec3), &normals[0], GL_STATIC_DRAW);
 
     // Let's create a light for great glory, yo
     glm::vec3 lightPos = glm::vec3(10, 4, 2);
@@ -150,7 +231,7 @@ int main(int argc, const char *argv[]) {
 	while(!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
-        //glEnable(GL_CULL_FACE);
+        glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
 
         deltaTime = glfwGetTime() - lastTime;
@@ -162,31 +243,7 @@ int main(int argc, const char *argv[]) {
 
         glBindTexture(GL_TEXTURE_2D, tex);
 
-        glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, positionBuffer);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0*sizeof(float), (void*)0);
-
-        glEnableVertexAttribArray(1);
-        glBindBuffer(GL_ARRAY_BUFFER, texCoordsBuffer);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0*sizeof(float), (void*)0);
-
-        glEnableVertexAttribArray(2);
-        glBindBuffer(GL_ARRAY_BUFFER, normalsBuffer);
-        glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0*sizeof(float), (void*)0);
-
-        shaderProgram.begin();
-        shaderProgram.setUniform("modelViewProjectionMatrix", camera.getCombinedMatrix());
-        glm::mat4 model;
-        shaderProgram.setUniform("modelMatrix", model);
-        shaderProgram.setUniform("lightPos", lightPos);
-        glDrawArrays(GL_TRIANGLES, 0, 12*3);
-        shaderProgram.end();
-
-        glDisable(GL_DEPTH_TEST);
-        glDisable(GL_CULL_FACE);
-        glDisableVertexAttribArray(0);
-        glDisableVertexAttribArray(1);
-        glDisableVertexAttribArray(2);
+        modelInstance.render(camera, shaderProgram);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

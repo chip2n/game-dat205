@@ -1,8 +1,8 @@
 # Set the include folder
 include_directories(${CMAKE_SOURCE_DIR}/include)
 
-add_executable(RenderEngine test.cpp ShaderProgram.cpp Camera.cpp OBJLoader.cpp)
-target_link_libraries(RenderEngine ${GLFW} ${SOIL} ${OPENGL_LIBRARIES} ${GLEW_LIBRARY})
+add_executable(RenderEngine test.cpp ShaderProgram.cpp Camera.cpp OBJLoader.cpp Model.cpp ModelInstance.cpp)
+target_link_libraries(RenderEngine ${GLFW} ${SOIL} ${ASSIMP} ${OPENGL_LIBRARIES} ${GLEW_LIBRARY})
 
 
 add_custom_command(TARGET RenderEngine PRE_BUILD

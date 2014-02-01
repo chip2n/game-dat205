@@ -2,6 +2,7 @@
 #define SHADERPROGRAM_H
 
 #include <GL/glew.h> 
+#include <string>
 class ShaderProgram {
     public:
         ShaderProgram(const char *vertShaderPath, const char *fragShaderPath);

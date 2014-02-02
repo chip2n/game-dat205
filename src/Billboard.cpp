@@ -11,7 +11,7 @@ GLfloat Billboard::plane[] = {
     -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
 };
 
-Billboard::Billboard() {
+Billboard::Billboard(Texture &tex){
     if(vao != 0) {
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);

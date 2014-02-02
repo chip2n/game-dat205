@@ -6,10 +6,11 @@
 #include "Environment.h"
 #include "Camera.h"
 #include "ShaderProgram.h"
+#include "Texture.h"
 
 class Billboard {
     public:
-        Billboard();
+        Billboard(Texture &tex);
         void render(Camera &camera, Environment &env, ShaderProgram &shaderProgram);
     private:
         GLuint vao;

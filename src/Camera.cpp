@@ -43,7 +43,7 @@ void Camera::setPosition(glm::vec3 p) {
 
 void Camera::move(glm::vec3 vec) {
     position += vec;
-    std::cout << "Camera position: " << position.x << "," << position.y << "," << position.z << std::endl;
+    //std::cout << "Camera position: " << position.x << "," << position.y << "," << position.z << std::endl;
 }
 
 void Camera::rotate(glm::vec3 axis, float angle) {

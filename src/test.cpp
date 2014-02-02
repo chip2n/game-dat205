@@ -14,6 +14,7 @@
 #include "Environment.h"
 #include "Light.h"
 #include "Billboard.h"
+#include "Texture.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -218,24 +219,14 @@ int main(int argc, const char *argv[]) {
     texCoords = model.texCoords;
     normals = model.normals;
 
-    // Load a texture using SOIL, yo
-    GLuint tex = SOIL_load_OGL_texture ("bricks.png",
-            SOIL_LOAD_AUTO,
-            SOIL_CREATE_NEW_ID,
-            SOIL_FLAG_MIPMAPS |
-            SOIL_FLAG_INVERT_Y |
-            SOIL_FLAG_NTSC_SAFE_RGB |
-            SOIL_FLAG_COMPRESS_TO_DXT
-        );
-    if(0 == tex) {
-        std::cout << "Error loading texture." << std::endl;
-    }
+    Texture texture("bricks.png");
+    Texture testTex("light.png");
 
     Environment env;
     Light light(glm::vec3(10, 4, 2));
     env.addLight(light);
 
-    Billboard billboard;
+    Billboard billboard(texture);
 
     double lastTime = glfwGetTime();
     double deltaTime = lastTime;
@@ -243,6 +234,9 @@ int main(int argc, const char *argv[]) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
         //glEnable(GL_CULL_FACE);
+        glEnable(GL_TEXTURE_2D);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        glEnable(GL_BLEND);
         glCullFace(GL_BACK);
 
         deltaTime = glfwGetTime() - lastTime;
@@ -252,11 +246,13 @@ int main(int argc, const char *argv[]) {
         camera.move(10*(float)deltaTime * (camera.getRight() * movementDirection.x));
         camera.update();
 
-        glBindTexture(GL_TEXTURE_2D, tex);
-
-
+        texture.bind();
         modelInstance.render(camera, env, shaderProgram);
+        texture.unbind();
+        testTex.bind();
         billboard.render(camera, env, shaderProgram);
+        testTex.unbind();
+
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

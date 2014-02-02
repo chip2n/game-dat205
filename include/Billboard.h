@@ -12,6 +12,7 @@ class Billboard {
     public:
         Billboard(Texture &tex);
         void render(Camera &camera, Environment &env, ShaderProgram &shaderProgram);
+        void move(glm::vec3 vec);
     private:
         GLuint vao;
         GLuint vbo;

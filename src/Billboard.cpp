@@ -35,7 +35,6 @@ Billboard::Billboard(Texture &tex){
 }
 
 void Billboard::render(Camera &camera, Environment &env, ShaderProgram &shaderProgram) {
-    position = glm::vec3(0.0f, 0.0f, 3.0f);
     glBindVertexArray(vao);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
@@ -52,4 +51,8 @@ void Billboard::render(Camera &camera, Environment &env, ShaderProgram &shaderPr
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
 
+}
+
+void Billboard::move(glm::vec3 vec) {
+    position = position + vec;
 }

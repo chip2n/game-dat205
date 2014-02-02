@@ -198,6 +198,7 @@ int main(int argc, const char *argv[]) {
 
 
     // Load shaders, yo
+    ShaderProgram billboardShaderProgram("texture_noshading.vert", "texture_noshading.frag");
     ShaderProgram shaderProgram("simpleshading.vert", "simpleshading.frag");
 
     // Init camera at position (2,3,3) looking at origin, yo
@@ -205,19 +206,23 @@ int main(int argc, const char *argv[]) {
     camera.lookAt(glm::vec3(0,0,0));
     camera.update();
 
+
+    Model model;
+    model.loadFromFile("cube.obj");
+    ModelInstance modelInstance(&model);
+
+    Model monkey;
+    monkey.loadFromFile("monkey.obj");
+    ModelInstance monkeyInstance(&monkey); // TODO: REMOVEs BILLBOARD WTF?
+    monkeyInstance.move(glm::vec3(3,0,0));
+    /* LULZ this code snippet breaks blending somehow...1
     std::vector<glm::vec3> obj;
     std::vector<glm::vec2> texCoords;
     std::vector<glm::vec3> normals;
-    /*
-    loader.loadOBJ("cube.obj", obj, texCoords, normals);
-    */
-
-    Model model;
-    model.loadFromFile("cube.3ds");
-    ModelInstance modelInstance(&model);
     obj = model.positions;
     texCoords = model.texCoords;
     normals = model.normals;
+    */
 
     Texture texture("bricks.png");
     Texture testTex("light.png");
@@ -227,6 +232,7 @@ int main(int argc, const char *argv[]) {
     env.addLight(light);
 
     Billboard billboard(texture);
+    billboard.move(glm::vec3(10, 4, 2));
 
     double lastTime = glfwGetTime();
     double deltaTime = lastTime;
@@ -248,9 +254,10 @@ int main(int argc, const char *argv[]) {
 
         texture.bind();
         modelInstance.render(camera, env, shaderProgram);
+        monkeyInstance.render(camera, env, shaderProgram);
         texture.unbind();
         testTex.bind();
-        billboard.render(camera, env, shaderProgram);
+        billboard.render(camera, env, billboardShaderProgram);
         testTex.unbind();
 
 

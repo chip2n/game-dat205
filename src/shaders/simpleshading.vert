@@ -13,7 +13,7 @@ uniform mat4 modelViewProjectionMatrix;
 uniform mat4 modelMatrix;
 
 void main() {
-    gl_Position = modelViewProjectionMatrix * vec4(position, 1.0);
+    gl_Position = modelViewProjectionMatrix * modelMatrix * vec4(position, 1.0);
     worldPosition = vec3(modelMatrix * vec4(position, 1.0));
     outNormal = normal;
     texCoords = texCoordsIn;

@@ -11,6 +11,9 @@
 #include "OBJLoader.h"
 #include "Model.h"
 #include "ModelInstance.h"
+#include "Environment.h"
+#include "Light.h"
+#include "Billboard.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -201,7 +204,6 @@ int main(int argc, const char *argv[]) {
     camera.lookAt(glm::vec3(0,0,0));
     camera.update();
 
-    OBJLoader loader;
     std::vector<glm::vec3> obj;
     std::vector<glm::vec2> texCoords;
     std::vector<glm::vec3> normals;
@@ -210,28 +212,37 @@ int main(int argc, const char *argv[]) {
     */
 
     Model model;
-    model.loadFromFile("cube.obj");
+    model.loadFromFile("cube.3ds");
     ModelInstance modelInstance(&model);
     obj = model.positions;
     texCoords = model.texCoords;
     normals = model.normals;
 
     // Load a texture using SOIL, yo
-    GLuint tex = SOIL_load_OGL_texture ("bricks.png", SOIL_LOAD_AUTO, SOIL_CREATE_NEW_ID, SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT);
+    GLuint tex = SOIL_load_OGL_texture ("bricks.png",
+            SOIL_LOAD_AUTO,
+            SOIL_CREATE_NEW_ID,
+            SOIL_FLAG_MIPMAPS |
+            SOIL_FLAG_INVERT_Y |
+            SOIL_FLAG_NTSC_SAFE_RGB |
+            SOIL_FLAG_COMPRESS_TO_DXT
+        );
     if(0 == tex) {
         std::cout << "Error loading texture." << std::endl;
     }
 
+    Environment env;
+    Light light(glm::vec3(10, 4, 2));
+    env.addLight(light);
 
-    // Let's create a light for great glory, yo
-    glm::vec3 lightPos = glm::vec3(10, 4, 2);
+    Billboard billboard;
 
     double lastTime = glfwGetTime();
     double deltaTime = lastTime;
 	while(!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
-        glEnable(GL_CULL_FACE);
+        //glEnable(GL_CULL_FACE);
         glCullFace(GL_BACK);
 
         deltaTime = glfwGetTime() - lastTime;
@@ -243,7 +254,9 @@ int main(int argc, const char *argv[]) {
 
         glBindTexture(GL_TEXTURE_2D, tex);
 
-        modelInstance.render(camera, shaderProgram);
+
+        modelInstance.render(camera, env, shaderProgram);
+        billboard.render(camera, env, shaderProgram);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

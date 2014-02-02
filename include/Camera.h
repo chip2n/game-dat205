@@ -18,8 +18,8 @@ class Camera {
         glm::vec3 getDirection();
         glm::vec3 getRight();
         glm::vec3 getUp();
-    private:
         glm::vec3 position;
+    private:
         glm::mat4 projection;
         glm::mat4 view;
         glm::mat4 combined;

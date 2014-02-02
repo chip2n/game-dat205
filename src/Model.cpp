@@ -7,7 +7,7 @@
 #include <glm/glm.hpp>
 #include "Model.h"
 
-bool Model::loadFromFile(char* path) {
+bool Model::loadFromFile(std::string path) {
     Assimp::Importer importer;
     const aiScene* scene = importer.ReadFile(path,
             aiProcess_CalcTangentSpace |
@@ -20,17 +20,26 @@ bool Model::loadFromFile(char* path) {
         return false;
     }
 
-    for(int i = 0; i < scene->mNumMeshes; ++i) {
+    std::cout << "Loaded model " << path << std::endl;
+    std::cout << "-- Number of meshes: " << scene->mNumMeshes << std::endl;
+    std::cout << "-- Number of animations: " << scene->mNumAnimations << std::endl;
+    std::cout << "-- Number of cameras: " << scene->mNumCameras << std::endl;
+    std::cout << "-- Number of lights: " << scene->mNumLights << std::endl;
+    std::cout << "-- Number of materials: " << scene->mNumMaterials << std::endl;
+    std::cout << "-- Number of textures: " << scene->mNumTextures << std::endl;
+
+    for(unsigned int i = 0; i < scene->mNumMeshes; ++i) {
         aiMesh* mesh = scene->mMeshes[i];
 
-        for(int j = 0; j < mesh->mNumFaces; ++j) {
+        for(unsigned int j = 0; j < mesh->mNumFaces; ++j) {
             const aiFace& face = mesh->mFaces[j];
 
             for(int k = 0; k < 3; ++k) {
                 aiVector3D pos = mesh->mVertices[face.mIndices[k]];
                 aiVector3D uv = mesh->mTextureCoords[0][face.mIndices[k]];
-                aiVector3D normal = mesh->HasNormals() ? mesh->mNormals[face.mIndices[k]] : aiVector3D(1.0f, 1.0f, 1.0f);
-
+                aiVector3D normal = mesh->HasNormals()
+                    ? mesh->mNormals[face.mIndices[k]]
+                    : aiVector3D(1.0f, 1.0f, 1.0f);
 
                 positions.push_back(glm::vec3(pos.x, pos.y, pos.z));
                 normals.push_back(glm::vec3(normal.x, normal.y, normal.z));
@@ -52,7 +61,6 @@ bool Model::loadFromFile(char* path) {
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
-    // Generate some of the buffers yo
     glGenBuffers(1, &vbo);
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, test.size()*sizeof(float), &test[0], GL_STATIC_DRAW);
@@ -67,4 +75,8 @@ bool Model::loadFromFile(char* path) {
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*) (5*sizeof(float)));
 
     return true;
+}
+
+unsigned int Model::getNumberOfVertices() {
+    return positions.size() * 3;
 }

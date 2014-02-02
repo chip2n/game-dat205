@@ -14,6 +14,5 @@ void main() {
 
     vec3 diffuse = vec3(0.5, 0.5, 0.5)*theta;
     vec3 ambient = vec3(0.1, 0.1, 0.1);
-//color = (ambient + diffuse) * c;
-    color = c;
+    color = (ambient + diffuse) * c;
 }

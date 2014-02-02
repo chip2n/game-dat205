@@ -1,3 +1,4 @@
+#include <iostream>
 #include <GL/glew.h>
 #include "ModelInstance.h"
 
@@ -5,7 +6,7 @@ ModelInstance::ModelInstance(Model *m) {
     model = m;
 }
 
-void ModelInstance::render(Camera &camera, ShaderProgram &shaderProgram)  {
+void ModelInstance::render(Camera &camera, Environment &env, ShaderProgram &shaderProgram)  {
     glBindVertexArray(model->vao);
     glBindBuffer(GL_ARRAY_BUFFER, model->vbo);
 
@@ -13,7 +14,8 @@ void ModelInstance::render(Camera &camera, ShaderProgram &shaderProgram)  {
     shaderProgram.setUniform("modelViewProjectionMatrix", camera.getCombinedMatrix());
     glm::mat4 modelM;
     shaderProgram.setUniform("modelMatrix", modelM);
-    glDrawArrays(GL_TRIANGLES, 0, model->positions.size()*3);
+    shaderProgram.setUniform("lightPos", env.getLights()[0].getPosition());
+    glDrawArrays(GL_TRIANGLES, 0, model->getNumberOfVertices());
     shaderProgram.end();
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);

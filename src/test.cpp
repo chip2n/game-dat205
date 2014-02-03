@@ -215,14 +215,9 @@ int main(int argc, const char *argv[]) {
     monkey.loadFromFile("monkey.obj");
     ModelInstance monkeyInstance(&monkey); // TODO: REMOVEs BILLBOARD WTF?
     monkeyInstance.move(glm::vec3(3,0,0));
-    /* LULZ this code snippet breaks blending somehow...1
-    std::vector<glm::vec3> obj;
-    std::vector<glm::vec2> texCoords;
-    std::vector<glm::vec3> normals;
-    obj = model.positions;
-    texCoords = model.texCoords;
-    normals = model.normals;
-    */
+
+    ModelInstance monkeyInstance2(&monkey);
+    monkeyInstance2.move(glm::vec3(0,2,0));
 
     Texture texture("bricks.png");
     Texture testTex("light.png");
@@ -231,7 +226,7 @@ int main(int argc, const char *argv[]) {
     Light light(glm::vec3(10, 4, 2));
     env.addLight(light);
 
-    Billboard billboard(texture);
+    Billboard billboard;
     billboard.move(glm::vec3(10, 4, 2));
 
     double lastTime = glfwGetTime();
@@ -255,6 +250,7 @@ int main(int argc, const char *argv[]) {
         texture.bind();
         modelInstance.render(camera, env, shaderProgram);
         monkeyInstance.render(camera, env, shaderProgram);
+        monkeyInstance2.render(camera, env, shaderProgram);
         texture.unbind();
         testTex.bind();
         billboard.render(camera, env, billboardShaderProgram);

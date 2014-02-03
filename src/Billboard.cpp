@@ -1,3 +1,5 @@
+#include <GL/glew.h>
+#include <iostream>
 #include "Billboard.h"
 
 GLfloat Billboard::plane[] = {
@@ -11,17 +13,13 @@ GLfloat Billboard::plane[] = {
     -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f,
 };
 
-Billboard::Billboard(Texture &tex){
-    if(vao != 0) {
+Billboard::Billboard(){
         glGenVertexArrays(1, &vao);
         glBindVertexArray(vao);
-    }
 
-    if(vbo != 0) {
         glGenBuffers(1, &vbo);
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, 8*6*sizeof(float), plane, GL_STATIC_DRAW);
-    }
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*)0);

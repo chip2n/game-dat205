@@ -200,6 +200,7 @@ int main(int argc, const char *argv[]) {
     // Load shaders, yo
     ShaderProgram billboardShaderProgram("texture_noshading.vert", "texture_noshading.frag");
     ShaderProgram shaderProgram("simpleshading.vert", "simpleshading.frag");
+    ShaderProgram shadowmapShaderProgram("shadowmap.vert", "shadowmap.frag");
 
     // Init camera at position (2,3,3) looking at origin, yo
     camera.setPosition(glm::vec3(2,3,3));
@@ -229,6 +230,66 @@ int main(int argc, const char *argv[]) {
     Billboard billboard;
     billboard.move(glm::vec3(10, 4, 2));
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // SHADOW MAP STUFF
+    GLuint framebuffer;
+    glGenFramebuffers(1, &framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+
+    GLuint depthTexture;
+    glGenTextures(1, &depthTexture);
+    glBindTexture(GL_TEXTURE_2D, depthTexture);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture, 0);
+
+
+    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        std::cout << "Failed to set up shadow map framebuffer." << std::endl;
+    }
+
+    glm::vec3 lightInvDir = glm::vec3(10, 4, 2);
+    
+    glm::mat4 depthProjectionMatrix = glm::ortho<float>(-10,10,-10,10,-10,20);
+    glm::mat4 depthViewMatrix = glm::lookAt(lightInvDir, glm::vec3(0,0,0), glm::vec3(0,1,0));
+    glm::mat4 depthModelMatrix = glm::mat4(1.0);
+    glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
+        
+    glm::mat4 biasMatrix(
+            0.5, 0.0, 0.0, 0.0,
+            0.0, 0.5, 0.0, 0.0,
+            0.0, 0.0, 0.5, 0.0,
+            0.5, 0.5, 0.5, 1.0
+            );
+    glm::mat4 depthBiasMVP = biasMatrix * depthMVP;
+
+
+
+
+
+
+
+
+
+
+
+
     double lastTime = glfwGetTime();
     double deltaTime = lastTime;
 	while(!glfwWindowShouldClose(window)) {
@@ -247,11 +308,38 @@ int main(int argc, const char *argv[]) {
         camera.move(10*(float)deltaTime * (camera.getRight() * movementDirection.x));
         camera.update();
 
+
+        // Render shadowmap
+        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
+        glViewport(0, 0, 1024, 1024);
+        glDrawBuffer(GL_NONE);
+        shadowmapShaderProgram.begin();
+        shadowmapShaderProgram.setUniform("depthMVP", depthMVP);
+        modelInstance.render(camera, env, shadowmapShaderProgram);
+        monkeyInstance.render(camera, env, shadowmapShaderProgram);
+        monkeyInstance2.render(camera, env, shadowmapShaderProgram);
+        shadowmapShaderProgram.end();
+
+        // End render shadowmap
+        
+
+
+        glBindFramebuffer(GL_FRAMEBUFFER, 0);
+        glDrawBuffer(GL_BACK);
+        glActiveTexture(GL_TEXTURE0);
         texture.bind();
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, depthTexture);
+        shaderProgram.begin();
+        shaderProgram.setUniform("texSampler", 0);
+        shaderProgram.setUniform("shadowMap", 1);
+        shaderProgram.setUniform("depthBiasMVP", depthBiasMVP);
+        shaderProgram.end();
         modelInstance.render(camera, env, shaderProgram);
         monkeyInstance.render(camera, env, shaderProgram);
         monkeyInstance2.render(camera, env, shaderProgram);
         texture.unbind();
+    glActiveTexture(GL_TEXTURE0);
         testTex.bind();
         billboard.render(camera, env, billboardShaderProgram);
         testTex.unbind();

@@ -108,3 +108,11 @@ void ShaderProgram::setUniform(const char* location, glm::vec3 vec) {
     GLuint m = glGetUniformLocation(program, location);
     glUniform3fv(m, 1, &vec[0]);
 }
+
+void ShaderProgram::setUniform(const char* location, int value) {
+    if(!active) {
+        throw ShaderException("You need to call ShaderProgram.begin() before assigning uniforms.");
+    }
+    GLuint m = glGetUniformLocation(program, location);
+    glUniform1i(m, value);
+}

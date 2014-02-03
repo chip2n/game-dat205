@@ -9,13 +9,16 @@ layout(location = 2) in vec3 normal;
 out vec2 texCoords;
 out vec3 worldPosition;
 out vec3 outNormal;
+out vec4 shadowCoord;
 uniform mat4 modelViewProjectionMatrix;
 uniform mat4 modelMatrix;
+uniform mat4 depthBiasMVP;
 
 void main() {
     gl_Position = modelViewProjectionMatrix * modelMatrix * vec4(position, 1.0);
     worldPosition = vec3(modelMatrix * vec4(position, 1.0));
     outNormal = normal;
     texCoords = texCoordsIn;
+    shadowCoord = depthBiasMVP * vec4(position, 1.0);
 }
 

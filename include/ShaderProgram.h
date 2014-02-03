@@ -11,6 +11,7 @@ class ShaderProgram {
         void end();
         void setUniform(const char *location, glm::mat4 mat);
         void setUniform(const char *location, glm::vec3 vec);
+        void setUniform(const char *location, int value);
     private:
         GLuint program;
         bool active;

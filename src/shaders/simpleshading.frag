@@ -18,7 +18,8 @@ void main() {
     vec3 ambient = vec3(0.1, 0.1, 0.1);
 
     float visibility = 1.0;
-    if( texture(shadowMap, shadowCoord.xy).z < shadowCoord.z) {
+    float bias = 0.005;
+    if( texture(shadowMap, shadowCoord.xy).z < shadowCoord.z - bias) {
         visibility = 0.1;
     }
     vec4 phong = vec4(visibility*(ambient + diffuse), 1.0);

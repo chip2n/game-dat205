@@ -313,11 +313,29 @@ int main(int argc, const char *argv[]) {
         glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
         glViewport(0, 0, 1024, 1024);
         glDrawBuffer(GL_NONE);
+        
         shadowmapShaderProgram.begin();
+    depthModelMatrix = glm::mat4(1.0);
+    depthModelMatrix = glm::translate(depthModelMatrix, monkeyInstance.position);
+    depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
+        shadowmapShaderProgram.setUniform("depthMVP", depthMVP);
+        monkeyInstance.render(camera, env, shadowmapShaderProgram);
+
+
+        shadowmapShaderProgram.begin();
+    depthModelMatrix = glm::mat4(1.0);
+    depthModelMatrix = glm::translate(depthModelMatrix, monkeyInstance2.position);
+    depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
+        shadowmapShaderProgram.setUniform("depthMVP", depthMVP);
+        monkeyInstance2.render(camera, env, shadowmapShaderProgram);
+
+        shadowmapShaderProgram.begin();
+    depthModelMatrix = glm::mat4(1.0);
+    depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
         shadowmapShaderProgram.setUniform("depthMVP", depthMVP);
         modelInstance.render(camera, env, shadowmapShaderProgram);
-        monkeyInstance.render(camera, env, shadowmapShaderProgram);
-        monkeyInstance2.render(camera, env, shadowmapShaderProgram);
+
+
         shadowmapShaderProgram.end();
 
         // End render shadowmap

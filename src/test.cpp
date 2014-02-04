@@ -215,7 +215,7 @@ int main(int argc, const char *argv[]) {
     Model monkey;
     monkey.loadFromFile("monkey.obj");
     ModelInstance monkeyInstance(&monkey); // TODO: REMOVEs BILLBOARD WTF?
-    monkeyInstance.move(glm::vec3(3,0,0));
+    monkeyInstance.move(glm::vec3(10,0,0));
 
     ModelInstance monkeyInstance2(&monkey);
     monkeyInstance2.move(glm::vec3(0,2,0));
@@ -295,7 +295,7 @@ int main(int argc, const char *argv[]) {
 	while(!glfwWindowShouldClose(window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
-        //glEnable(GL_CULL_FACE);
+        glEnable(GL_CULL_FACE);
         glEnable(GL_TEXTURE_2D);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);
@@ -316,11 +316,16 @@ int main(int argc, const char *argv[]) {
         
         shadowmapShaderProgram.begin();
     depthModelMatrix = glm::mat4(1.0);
+    depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
+        shadowmapShaderProgram.setUniform("depthMVP", depthMVP);
+        modelInstance.render(camera, env, shadowmapShaderProgram);
+
+        shadowmapShaderProgram.begin();
+    depthModelMatrix = glm::mat4(1.0);
     depthModelMatrix = glm::translate(depthModelMatrix, monkeyInstance.position);
     depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
         shadowmapShaderProgram.setUniform("depthMVP", depthMVP);
         monkeyInstance.render(camera, env, shadowmapShaderProgram);
-
 
         shadowmapShaderProgram.begin();
     depthModelMatrix = glm::mat4(1.0);
@@ -329,11 +334,6 @@ int main(int argc, const char *argv[]) {
         shadowmapShaderProgram.setUniform("depthMVP", depthMVP);
         monkeyInstance2.render(camera, env, shadowmapShaderProgram);
 
-        shadowmapShaderProgram.begin();
-    depthModelMatrix = glm::mat4(1.0);
-    depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
-        shadowmapShaderProgram.setUniform("depthMVP", depthMVP);
-        modelInstance.render(camera, env, shadowmapShaderProgram);
 
 
         shadowmapShaderProgram.end();
@@ -351,10 +351,30 @@ int main(int argc, const char *argv[]) {
         shaderProgram.begin();
         shaderProgram.setUniform("texSampler", 0);
         shaderProgram.setUniform("shadowMap", 1);
+    depthModelMatrix = glm::mat4(1.0);
+    depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
+    depthBiasMVP = biasMatrix * depthMVP;
         shaderProgram.setUniform("depthBiasMVP", depthBiasMVP);
         shaderProgram.end();
         modelInstance.render(camera, env, shaderProgram);
+
+
+        shaderProgram.begin();
+    depthModelMatrix = glm::mat4(1.0);
+    depthModelMatrix = glm::translate(depthModelMatrix, monkeyInstance.position);
+    depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
+    depthBiasMVP = biasMatrix * depthMVP;
+        shaderProgram.setUniform("depthBiasMVP", depthBiasMVP);
+        shaderProgram.end();
         monkeyInstance.render(camera, env, shaderProgram);
+
+        shaderProgram.begin();
+    depthModelMatrix = glm::mat4(1.0);
+    depthModelMatrix = glm::translate(depthModelMatrix, monkeyInstance2.position);
+    depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
+    depthBiasMVP = biasMatrix * depthMVP;
+        shaderProgram.setUniform("depthBiasMVP", depthBiasMVP);
+        shaderProgram.end();
         monkeyInstance2.render(camera, env, shaderProgram);
         texture.unbind();
     glActiveTexture(GL_TEXTURE0);

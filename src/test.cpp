@@ -15,6 +15,7 @@
 #include "Light.h"
 #include "Billboard.h"
 #include "Texture.h"
+#include "ShadowMap.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -232,60 +233,7 @@ int main(int argc, const char *argv[]) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-    // SHADOW MAP STUFF
-    GLuint framebuffer;
-    glGenFramebuffers(1, &framebuffer);
-    glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-
-    GLuint depthTexture;
-    glGenTextures(1, &depthTexture);
-    glBindTexture(GL_TEXTURE_2D, depthTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-
-        glFramebufferTexture(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, depthTexture, 0);
-
-
-    if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        std::cout << "Failed to set up shadow map framebuffer." << std::endl;
-    }
-
-    glm::vec3 lightInvDir = glm::vec3(10, 4, 2);
-    
-    glm::mat4 depthProjectionMatrix = glm::ortho<float>(-10,10,-10,10,-10,20);
-    glm::mat4 depthViewMatrix = glm::lookAt(lightInvDir, glm::vec3(0,0,0), glm::vec3(0,1,0));
-    glm::mat4 depthModelMatrix = glm::mat4(1.0);
-    glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
-        
-    glm::mat4 biasMatrix(
-            0.5, 0.0, 0.0, 0.0,
-            0.0, 0.5, 0.0, 0.0,
-            0.0, 0.0, 0.5, 0.0,
-            0.5, 0.5, 0.5, 1.0
-            );
-    glm::mat4 depthBiasMVP = biasMatrix * depthMVP;
-
-
-
-
-
-
-
-
+    ShadowMap shadowMap(shadowmapShaderProgram);
 
 
 
@@ -309,75 +257,39 @@ int main(int argc, const char *argv[]) {
         camera.update();
 
 
-        // Render shadowmap
-        glBindFramebuffer(GL_FRAMEBUFFER, framebuffer);
-        glViewport(0, 0, 1024, 1024);
-        glDrawBuffer(GL_NONE);
-        
-        shadowmapShaderProgram.begin();
-    depthModelMatrix = glm::mat4(1.0);
-    depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
-        shadowmapShaderProgram.setUniform("depthMVP", depthMVP);
-        modelInstance.render(camera, env, shadowmapShaderProgram);
-
-        shadowmapShaderProgram.begin();
-    depthModelMatrix = glm::mat4(1.0);
-    depthModelMatrix = glm::translate(depthModelMatrix, monkeyInstance.position);
-    depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
-        shadowmapShaderProgram.setUniform("depthMVP", depthMVP);
-        monkeyInstance.render(camera, env, shadowmapShaderProgram);
-
-        shadowmapShaderProgram.begin();
-    depthModelMatrix = glm::mat4(1.0);
-    depthModelMatrix = glm::translate(depthModelMatrix, monkeyInstance2.position);
-    depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
-        shadowmapShaderProgram.setUniform("depthMVP", depthMVP);
-        monkeyInstance2.render(camera, env, shadowmapShaderProgram);
+        shadowMap.begin();
+        shadowMap.render(modelInstance);
+        shadowMap.render(monkeyInstance);
+        shadowMap.render(monkeyInstance2);
+        shadowMap.end();
 
 
-
-        shadowmapShaderProgram.end();
-
-        // End render shadowmap
-        
-
-
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glDrawBuffer(GL_BACK);
         glActiveTexture(GL_TEXTURE0);
         texture.bind();
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, depthTexture);
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, shadowMap.depthTexture);
         shaderProgram.begin();
         shaderProgram.setUniform("texSampler", 0);
         shaderProgram.setUniform("shadowMap", 1);
-    depthModelMatrix = glm::mat4(1.0);
-    depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
-    depthBiasMVP = biasMatrix * depthMVP;
+        glm::mat4 depthBiasMVP = shadowMap.getBiasMVP(glm::vec3(0,0,0));
         shaderProgram.setUniform("depthBiasMVP", depthBiasMVP);
         shaderProgram.end();
         modelInstance.render(camera, env, shaderProgram);
 
 
         shaderProgram.begin();
-    depthModelMatrix = glm::mat4(1.0);
-    depthModelMatrix = glm::translate(depthModelMatrix, monkeyInstance.position);
-    depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
-    depthBiasMVP = biasMatrix * depthMVP;
+        depthBiasMVP = shadowMap.getBiasMVP(monkeyInstance.position);
         shaderProgram.setUniform("depthBiasMVP", depthBiasMVP);
         shaderProgram.end();
         monkeyInstance.render(camera, env, shaderProgram);
 
         shaderProgram.begin();
-    depthModelMatrix = glm::mat4(1.0);
-    depthModelMatrix = glm::translate(depthModelMatrix, monkeyInstance2.position);
-    depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
-    depthBiasMVP = biasMatrix * depthMVP;
+        depthBiasMVP = shadowMap.getBiasMVP(monkeyInstance2.position);
         shaderProgram.setUniform("depthBiasMVP", depthBiasMVP);
         shaderProgram.end();
         monkeyInstance2.render(camera, env, shaderProgram);
         texture.unbind();
-    glActiveTexture(GL_TEXTURE0);
+        glActiveTexture(GL_TEXTURE0);
         testTex.bind();
         billboard.render(camera, env, billboardShaderProgram);
         testTex.unbind();

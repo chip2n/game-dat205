@@ -3,6 +3,8 @@
 
 #include <GL/glew.h> 
 #include <string>
+#include <glm/glm.hpp>
+
 class ShaderProgram {
     public:
         ShaderProgram(const char *vertShaderPath, const char *fragShaderPath);

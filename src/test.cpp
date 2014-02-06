@@ -215,7 +215,7 @@ int main(int argc, const char *argv[]) {
 
     Model monkey;
     monkey.loadFromFile("monkey.obj");
-    ModelInstance monkeyInstance(&monkey); // TODO: REMOVEs BILLBOARD WTF?
+    ModelInstance monkeyInstance(&monkey);
     monkeyInstance.move(glm::vec3(10,0,0));
 
     ModelInstance monkeyInstance2(&monkey);
@@ -232,10 +232,7 @@ int main(int argc, const char *argv[]) {
     billboard.move(glm::vec3(10, 4, 2));
 
 
-
     ShadowMap shadowMap(shadowmapShaderProgram);
-
-
 
 
     double lastTime = glfwGetTime();
@@ -256,6 +253,8 @@ int main(int argc, const char *argv[]) {
         camera.move(10*(float)deltaTime * (camera.getRight() * movementDirection.x));
         camera.update();
 
+        monkeyInstance.rotate(-deltaTime*30, glm::vec3(0,1,0));
+        monkeyInstance2.rotate(deltaTime*10, glm::vec3(0,1,0));
 
         shadowMap.begin();
         shadowMap.render(modelInstance);
@@ -288,6 +287,9 @@ int main(int argc, const char *argv[]) {
         shaderProgram.setUniform("depthBiasMVP", depthBiasMVP);
         shaderProgram.end();
         monkeyInstance2.render(camera, env, shaderProgram);
+
+
+
         texture.unbind();
         glActiveTexture(GL_TEXTURE0);
         testTex.bind();

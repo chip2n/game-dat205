@@ -17,7 +17,7 @@ uniform mat4 depthBiasMVP;
 void main() {
     gl_Position = modelViewProjectionMatrix * modelMatrix * vec4(position, 1.0);
     worldPosition = vec3(modelMatrix * vec4(position, 1.0));
-    outNormal = normal;
+    outNormal = vec3(modelMatrix * vec4(normal, 0.0));
     texCoords = texCoordsIn;
     shadowCoord = depthBiasMVP * vec4(position, 1.0);
 }

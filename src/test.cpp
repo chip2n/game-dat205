@@ -277,13 +277,15 @@ int main(int argc, const char *argv[]) {
 
 
         shaderProgram.begin();
-        depthBiasMVP = shadowMap.getBiasMVP(monkeyInstance.position);
+        //depthBiasMVP = shadowMap.getBiasMVP(monkeyInstance.position);
+        depthBiasMVP = shadowMap.getBiasMVP(glm::vec3(0,0,0)) * monkeyInstance.getModelMatrix();
         shaderProgram.setUniform("depthBiasMVP", depthBiasMVP);
         shaderProgram.end();
         monkeyInstance.render(camera, env, shaderProgram);
 
         shaderProgram.begin();
-        depthBiasMVP = shadowMap.getBiasMVP(monkeyInstance2.position);
+        //depthBiasMVP = shadowMap.getBiasMVP(monkeyInstance2.position);
+        depthBiasMVP = shadowMap.getBiasMVP(glm::vec3(0,0,0)) * monkeyInstance2.getModelMatrix();
         shaderProgram.setUniform("depthBiasMVP", depthBiasMVP);
         shaderProgram.end();
         monkeyInstance2.render(camera, env, shaderProgram);

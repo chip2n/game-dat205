@@ -17,6 +17,7 @@
 #include "Texture.h"
 #include "ShadowMap.h"
 #include "Window.h"
+#include "Screen.h"
 
 #include <assimp/Importer.hpp>
 #include <assimp/scene.h>
@@ -124,7 +125,6 @@ int main(int argc, const char *argv[]) {
     billboard.move(glm::vec3(10, 4, 2));
 
     ShadowMap shadowMap(shadowmapShaderProgram);
-
 
     double lastTime = glfwGetTime();
     double deltaTime = lastTime;

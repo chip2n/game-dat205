@@ -26,6 +26,6 @@ else(WIN32)
     set(ASSIMP "assimp")
 endif(WIN32)
 
-set(CMAKE_CXX_FLAGS " -std=c++0x -g -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -g -Wall")
 
 add_subdirectory(${SOURCE_DIR})

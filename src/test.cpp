@@ -92,9 +92,9 @@ int main(int argc, const char *argv[]) {
 
 
     // Load shaders, yo
-    ShaderProgram billboardShaderProgram("texture_noshading.vert", "texture_noshading.frag");
-    ShaderProgram shaderProgram("simpleshading.vert", "simpleshading.frag");
-    ShaderProgram shadowmapShaderProgram("shadowmap.vert", "shadowmap.frag");
+    ShaderProgram billboardShaderProgram("shaders/texture_noshading.vert", "shaders/texture_noshading.frag");
+    ShaderProgram shaderProgram("shaders/simpleshading.vert", "shaders/simpleshading.frag");
+    ShaderProgram shadowmapShaderProgram("shaders/shadowmap.vert", "shaders/shadowmap.frag");
 
     // Init camera at position (2,3,3) looking at origin, yo
     camera.setPosition(glm::vec3(2,3,3));
@@ -103,19 +103,19 @@ int main(int argc, const char *argv[]) {
 
 
     Model model;
-    model.loadFromFile("cube.obj");
+    model.loadFromFile("models/cube.obj");
     ModelInstance modelInstance(&model);
 
     Model monkey;
-    monkey.loadFromFile("monkey.obj");
+    monkey.loadFromFile("models/monkey.obj");
     ModelInstance monkeyInstance(&monkey);
     monkeyInstance.move(glm::vec3(10,0,0));
 
     ModelInstance monkeyInstance2(&monkey);
     monkeyInstance2.move(glm::vec3(0,2,0));
 
-    Texture texture("bricks.png");
-    Texture testTex("light.png");
+    Texture texture("textures/bricks.png");
+    Texture testTex("textures/light.png");
 
     Environment env;
     Light light(glm::vec3(10, 4, 2));

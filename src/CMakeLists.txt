@@ -7,4 +7,12 @@ target_link_libraries(RenderEngine ${GLFW} ${SOIL} ${ASSIMP} ${OPENGL_LIBRARIES}
 
 add_custom_command(TARGET RenderEngine PRE_BUILD
                    COMMAND ${CMAKE_COMMAND} -E copy_directory
-                       ${CMAKE_SOURCE_DIR}/src/shaders $<TARGET_FILE_DIR:RenderEngine>)
+                       ${CMAKE_SOURCE_DIR}/src/shaders $<TARGET_FILE_DIR:RenderEngine>/shaders)
+
+add_custom_command(TARGET RenderEngine PRE_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+                       ${CMAKE_SOURCE_DIR}/src/models $<TARGET_FILE_DIR:RenderEngine>/models)
+
+add_custom_command(TARGET RenderEngine PRE_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+                       ${CMAKE_SOURCE_DIR}/src/textures $<TARGET_FILE_DIR:RenderEngine>/textures)

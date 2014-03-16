@@ -43,20 +43,5 @@ set(RENDERENGINE_SRCS
     ${PROJECT_SOURCE_DIR}/ScreenTest.cpp
 )
 
-#add_executable(RenderEngine ${RENDERENGINE_SRCS})
 add_library(${PROJECT_NAME} SHARED ${RENDERENGINE_SRCS})
-target_link_libraries(RenderEngine ${GLFW} ${SOIL} ${ASSIMP} ${OPENGL_LIBRARIES} ${GLEW_LIBRARY})
-
-
-# Copy assets
-add_custom_command(TARGET RenderEngine PRE_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E copy_directory
-                       ${PROJECT_SOURCE_DIR}/shaders $<TARGET_FILE_DIR:RenderEngine>/shaders)
-
-add_custom_command(TARGET RenderEngine PRE_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E copy_directory
-                       ${PROJECT_SOURCE_DIR}/models $<TARGET_FILE_DIR:RenderEngine>/models)
-
-add_custom_command(TARGET RenderEngine PRE_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E copy_directory
-                       ${PROJECT_SOURCE_DIR}/textures $<TARGET_FILE_DIR:RenderEngine>/textures)
+target_link_libraries(${PROJECT_NAME} ${GLFW} ${SOIL} ${ASSIMP} ${OPENGL_LIBRARIES} ${GLEW_LIBRARY})

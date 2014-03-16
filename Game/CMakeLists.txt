@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
+
 project(Game)
 
 # Set the external library folder
@@ -11,15 +12,19 @@ set(PROJECT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 # Set the include folders
 include_directories(${PROJECT_INCLUDE_DIR})
+include_directories(${CMAKE_SOURCE_DIR}/RenderEngine/include)
 # include_directories(${OPENGL_INCLUDE_DIRS})
 
-# Find GLFW amongst our external libraries
 set(RENDERENGINE "RenderEngine")
 
 set(GAME_SRCS 
     ${PROJECT_SOURCE_DIR}/test.cpp
 )
 
-add_executable(Game ${GAME_SRCS})
-target_link_libraries(Game ${RENDERENGINE})
+add_executable(${PROJECT_NAME} ${GAME_SRCS})
+target_link_libraries(${PROJECT_NAME} ${RENDERENGINE})
 
+# Copy assets
+add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E copy_directory
+                       ${CMAKE_CURRENT_SOURCE_DIR}/assets $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets)

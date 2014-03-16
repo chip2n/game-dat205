@@ -3,9 +3,11 @@
 Camera camera(45.0f, 640, 480);
 
 glm::vec3 movementDirection;
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods) {
+void key_callback(int key, int action) {
+    /*
 	if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, GL_TRUE);
+        */
 
     if(key == GLFW_KEY_W) {
         if(action == GLFW_PRESS || action == GLFW_REPEAT) {
@@ -57,8 +59,10 @@ static void resize_callback(GLFWwindow* window, int width, int height) {
 int main(int argc, const char *argv[]) {
      Window window;
 
+     window.setKeyCallback(key_callback);
+
     // Set up all them callbacks, yo
-	glfwSetKeyCallback(window.window, key_callback);
+	// glfwSetKeyCallback(window.window, key_callback);
     glfwSetCursorPosCallback(window.window, mouse_callback);
     glfwSetWindowSizeCallback(window.window, resize_callback);
 
@@ -66,7 +70,6 @@ int main(int argc, const char *argv[]) {
     if(glewInit() != GLEW_OK) {
         exit(EXIT_FAILURE);
     }
-
 
     // Load shaders, yo
     ShaderProgram billboardShaderProgram("assets/shaders/texture_noshading.vert", "assets/shaders/texture_noshading.frag");

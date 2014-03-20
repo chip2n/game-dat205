@@ -31,6 +31,7 @@ set(RENDERENGINE_SRCS
     ${PROJECT_SOURCE_DIR}/ShaderProgram.cpp
     ${PROJECT_SOURCE_DIR}/Camera.cpp
     ${PROJECT_SOURCE_DIR}/Model.cpp
+    ${PROJECT_SOURCE_DIR}/SkinnedModel.cpp
     ${PROJECT_SOURCE_DIR}/ModelInstance.cpp
     ${PROJECT_SOURCE_DIR}/Environment.cpp
     ${PROJECT_SOURCE_DIR}/Light.cpp

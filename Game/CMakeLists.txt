@@ -18,7 +18,7 @@ include_directories(${CMAKE_SOURCE_DIR}/RenderEngine/include)
 set(RENDERENGINE "RenderEngine")
 
 set(GAME_SRCS 
-    ${PROJECT_SOURCE_DIR}/test.cpp
+    ${PROJECT_SOURCE_DIR}/test2.cpp
 )
 
 add_executable(${PROJECT_NAME} ${GAME_SRCS})

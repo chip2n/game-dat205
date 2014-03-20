@@ -1,9 +1,6 @@
 #include <iostream>
 #include <vector>
 #include <GL/glew.h>
-#include <assimp/Importer.hpp>
-#include <assimp/scene.h>
-#include <assimp/postprocess.h>
 #include <glm/glm.hpp>
 #include "Model.h"
 
@@ -28,6 +25,12 @@ bool Model::loadFromFile(std::string path) {
     std::cout << "-- Number of materials: " << scene->mNumMaterials << std::endl;
     std::cout << "-- Number of textures: " << scene->mNumTextures << std::endl;
 
+    setupBuffers(scene);
+
+    return true;
+}
+
+void Model::setupBuffers(const aiScene* scene) {
     for(unsigned int i = 0; i < scene->mNumMeshes; ++i) {
         aiMesh* mesh = scene->mMeshes[i];
 
@@ -73,8 +76,6 @@ bool Model::loadFromFile(std::string path) {
 
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8*sizeof(float), (void*) (5*sizeof(float)));
-
-    return true;
 }
 
 unsigned int Model::getNumberOfVertices() {

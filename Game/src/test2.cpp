@@ -62,7 +62,6 @@ int main(int argc, const char *argv[]) {
      window.setKeyCallback(key_callback);
 
     // Set up all them callbacks, yo
-	// glfwSetKeyCallback(window.window, key_callback);
     glfwSetCursorPosCallback(window.window, mouse_callback);
     glfwSetWindowSizeCallback(window.window, resize_callback);
 
@@ -72,9 +71,7 @@ int main(int argc, const char *argv[]) {
     }
 
     // Load shaders, yo
-    ShaderProgram billboardShaderProgram("assets/shaders/texture_noshading.vert", "assets/shaders/texture_noshading.frag");
-    ShaderProgram shaderProgram("assets/shaders/simpleshading.vert", "assets/shaders/simpleshading.frag");
-    ShaderProgram shadowmapShaderProgram("assets/shaders/shadowmap.vert", "assets/shaders/shadowmap.frag");
+    ShaderProgram shaderProgram("assets/shaders/simple_shading_texture_skinning.vert", "assets/shaders/simple_shading_texture_skinning.frag");
 
     // Init camera at position (2,3,3) looking at origin, yo
     camera.setPosition(glm::vec3(2,3,3));
@@ -82,30 +79,16 @@ int main(int argc, const char *argv[]) {
     camera.update();
 
 
-    Model model;
-    //model.loadFromFile("assets/models/cube.obj");
-    model.loadFromFile("assets/unfinished/tiles.obj");
-    ModelInstance modelInstance(&model);
-
-    Model monkey;
+    SkinnedModel monkey;
     monkey.loadFromFile("assets/unfinished/editable-person.dae");
     ModelInstance monkeyInstance(&monkey);
-    monkeyInstance.move(glm::vec3(10,0,0));
-
-    ModelInstance monkeyInstance2(&monkey);
-    monkeyInstance2.move(glm::vec3(0,2,0));
+    //monkeyInstance.move(glm::vec3(10,0,0));
 
     Texture texture("assets/textures/bricks.png");
-    Texture testTex("assets/textures/light.png");
 
     Environment env;
     Light light(glm::vec3(10, 4, 2));
     env.addLight(light);
-
-    Billboard billboard;
-    billboard.move(glm::vec3(10, 4, 2));
-
-    ShadowMap shadowMap(shadowmapShaderProgram);
 
     double lastTime = glfwGetTime();
     double deltaTime = lastTime;
@@ -125,51 +108,10 @@ int main(int argc, const char *argv[]) {
         camera.move(10*(float)deltaTime * (camera.getRight() * movementDirection.x));
         camera.update();
 
-        monkeyInstance.rotate(-deltaTime*30, glm::vec3(0,1,0));
-        monkeyInstance2.rotate(deltaTime*10, glm::vec3(0,1,0));
-
-        shadowMap.begin();
-        shadowMap.render(modelInstance);
-        shadowMap.render(monkeyInstance);
-        shadowMap.render(monkeyInstance2);
-        shadowMap.end();
-
-
-        glActiveTexture(GL_TEXTURE0);
-        texture.bind();
-        glActiveTexture(GL_TEXTURE1);
-        glBindTexture(GL_TEXTURE_2D, shadowMap.depthTexture);
-        shaderProgram.begin();
-        shaderProgram.setUniform("texSampler", 0);
-        shaderProgram.setUniform("shadowMap", 1);
-        glm::mat4 depthBiasMVP = shadowMap.getBiasMVP(glm::vec3(0,0,0));
-        shaderProgram.setUniform("depthBiasMVP", depthBiasMVP);
-        shaderProgram.end();
-        modelInstance.render(camera, env, shaderProgram);
-
 
         shaderProgram.begin();
-        //depthBiasMVP = shadowMap.getBiasMVP(monkeyInstance.position);
-        depthBiasMVP = shadowMap.getBiasMVP(glm::vec3(0,0,0)) * monkeyInstance.getModelMatrix();
-        shaderProgram.setUniform("depthBiasMVP", depthBiasMVP);
-        shaderProgram.end();
         monkeyInstance.render(camera, env, shaderProgram);
-
-        shaderProgram.begin();
-        //depthBiasMVP = shadowMap.getBiasMVP(monkeyInstance2.position);
-        depthBiasMVP = shadowMap.getBiasMVP(glm::vec3(0,0,0)) * monkeyInstance2.getModelMatrix();
-        shaderProgram.setUniform("depthBiasMVP", depthBiasMVP);
         shaderProgram.end();
-        monkeyInstance2.render(camera, env, shaderProgram);
-
-
-
-        texture.unbind();
-        glActiveTexture(GL_TEXTURE0);
-        testTex.bind();
-        billboard.render(camera, env, billboardShaderProgram);
-        testTex.unbind();
-
 
 		glfwSwapBuffers(window.window);
 		glfwPollEvents();

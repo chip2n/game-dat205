@@ -10,6 +10,7 @@
 #include "Room.h"
 #include "OBJLoader.h"
 #include "Model.h"
+#include "SkinnedModel.h"
 #include "ModelInstance.h"
 #include "Environment.h"
 #include "Light.h"

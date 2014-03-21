@@ -12,8 +12,9 @@
 
 class Model {
     public:
+        Assimp::Importer importer;
         bool loadFromFile(std::string path);
-        virtual void setupBuffers(const aiScene* scene);
+        virtual void setupBuffers();
         unsigned int getNumberOfVertices();
         std::vector<glm::vec3> positions;
         std::vector<glm::vec3> normals;
@@ -21,6 +22,7 @@ class Model {
         std::vector<float> test;
         GLuint vao;
         GLuint vbo;
+        const aiScene* scene;
     private:
 
 };

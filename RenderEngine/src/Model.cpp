@@ -5,12 +5,12 @@
 #include "Model.h"
 
 bool Model::loadFromFile(std::string path) {
-    Assimp::Importer importer;
-    const aiScene* scene = importer.ReadFile(path,
+    scene = importer.ReadFile(path,
             aiProcess_CalcTangentSpace |
             aiProcess_Triangulate |
             aiProcess_JoinIdenticalVertices |
-            aiProcess_SortByPType);
+            aiProcess_SortByPType |
+            aiProcess_LimitBoneWeights);
 
     if(!scene) {
         std::cout << "WFEGFD" << std::endl;
@@ -25,12 +25,13 @@ bool Model::loadFromFile(std::string path) {
     std::cout << "-- Number of materials: " << scene->mNumMaterials << std::endl;
     std::cout << "-- Number of textures: " << scene->mNumTextures << std::endl;
 
-    setupBuffers(scene);
+
+    setupBuffers();
 
     return true;
 }
 
-void Model::setupBuffers(const aiScene* scene) {
+void Model::setupBuffers() {
     for(unsigned int i = 0; i < scene->mNumMeshes; ++i) {
         aiMesh* mesh = scene->mMeshes[i];
 

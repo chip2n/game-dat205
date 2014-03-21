@@ -1,4 +1,5 @@
 #include "RenderEngine.h"
+#include <sstream>
 
 Camera camera(45.0f, 640, 480);
 
@@ -56,6 +57,13 @@ static void resize_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
+void printMatrix(glm::mat4 m) {
+    std::cout << m[0][0] << ", " << m[0][1] << ", " << m[0][2] << ", " << m[0][3] << std::endl;
+    std::cout << m[1][0] << ", " << m[1][1] << ", " << m[1][2] << ", " << m[1][3] << std::endl;
+    std::cout << m[2][0] << ", " << m[2][1] << ", " << m[2][2] << ", " << m[2][3] << std::endl;
+    std::cout << m[3][0] << ", " << m[3][1] << ", " << m[3][2] << ", " << m[3][3] << std::endl;
+}
+
 int main(int argc, const char *argv[]) {
      Window window;
 
@@ -71,7 +79,7 @@ int main(int argc, const char *argv[]) {
     }
 
     // Load shaders, yo
-    ShaderProgram shaderProgram("assets/shaders/simple_shading_texture_skinning.vert", "assets/shaders/simple_shading_texture_skinning.frag");
+    ShaderProgram shaderProgram("assets/shaders/simple_shading_texture_skinning_bones.vert", "assets/shaders/simple_shading_texture_skinning_bones.frag");
 
     // Init camera at position (2,3,3) looking at origin, yo
     camera.setPosition(glm::vec3(2,3,3));
@@ -109,6 +117,25 @@ int main(int argc, const char *argv[]) {
         camera.update();
 
 
+
+
+        // Bones
+        std::vector<glm::mat4> transforms;
+        transforms.resize(4);
+        shaderProgram.begin();
+        monkey.boneTransform((float)lastTime, transforms);
+
+        for(uint i = 0; i < transforms.size(); i++) {
+            std::stringstream sstm;
+            sstm << "gBones[" << i << "]";
+            shaderProgram.setUniform(sstm.str().c_str(), transforms[i]);
+        }
+        
+
+
+
+
+
         shaderProgram.begin();
         monkeyInstance.render(camera, env, shaderProgram);
         shaderProgram.end();
@@ -117,3 +144,4 @@ int main(int argc, const char *argv[]) {
 		glfwPollEvents();
 	}
 }
+

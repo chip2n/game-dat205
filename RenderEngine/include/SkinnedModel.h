@@ -20,25 +20,33 @@ struct BoneInfo {
     glm::mat4 finalTransformation;
 };
 
+struct MeshEntry {
+    uint baseVertex = 0;
+};
 class SkinnedModel : public Model {
     public:
-        virtual void setupBuffers(const aiScene* scene);
-        void loadBones(const aiMesh* pMesh);
+        virtual void setupBuffers();
+        void loadBones(uint meshIndex, const aiMesh* pMesh);
         GLuint bonesVBO;
         std::vector<VertexBoneData> bones;
         std::map<std::string, uint> boneMapping;
         std::vector<BoneInfo> boneInfo;
-    private:
+        uint numVertices;
+        std::vector<MeshEntry> meshEntries;
         void boneTransform(float timeInSeconds, std::vector<glm::mat4>& transforms);
+    private:
+        uint numBones = 0;
         void readNodeHierarchy(float animationTime, const aiNode* pNode, const glm::mat4 parentTransform);
-        const aiScene* scene;
         void copyAiMatrixToGLM(const aiMatrix4x4 *from, glm::mat4 &to);
         void copyAiMatrixToGLM(const aiMatrix3x3 *from, glm::mat3 &to);
         void calcInterpolatedScaling(aiVector3D &scaling, float animationTime, const aiNodeAnim* pNodeAnim);
         void calcInterpolatedRotation(aiQuaternion &out, float animationTime, const aiNodeAnim* pNodeAnim);
         void calcInterpolatedPosition(aiVector3D &out, float animationTime, const aiNodeAnim* pNodeAnim);
+        uint findPosition(float AnimationTime, const aiNodeAnim* pNodeAnim);
+        uint FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim);
         const aiNodeAnim* findNodeAnim(const aiAnimation* pAnimation, std::string &nodeName);
         glm::mat4 globalInverseTransform;
+        uint findRotation(float animationTime, const aiNodeAnim* pNodeAnim);
 
 };
 

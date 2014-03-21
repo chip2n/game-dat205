@@ -3,8 +3,6 @@
 layout(location = 0) in vec3 position;
 layout(location = 1) in vec2 texCoordsIn;
 layout(location = 2) in vec3 normal;
-layout(location = 3) in vec3 boneIDs;
-layout(location = 4) in vec2 weights;
 
 out vec2 texCoords;
 out vec3 worldPosition;

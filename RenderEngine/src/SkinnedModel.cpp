@@ -4,13 +4,16 @@
 #include <glm/glm.hpp>
 #include "SkinnedModel.h"
 
-void SkinnedModel::setupBuffers(const aiScene* s) {
-    scene = s;
-
+void SkinnedModel::setupBuffers() {
     copyAiMatrixToGLM(&(scene->mRootNode->mTransformation), globalInverseTransform);
     globalInverseTransform = glm::inverse(globalInverseTransform);
+    numVertices = 0;
+    meshEntries.resize(scene->mNumMeshes);
+
     for(unsigned int i = 0; i < scene->mNumMeshes; ++i) {
         aiMesh* mesh = scene->mMeshes[i];
+        meshEntries[i].baseVertex = numVertices;
+        numVertices += mesh->mNumVertices;
 
         for(unsigned int j = 0; j < mesh->mNumFaces; ++j) {
             const aiFace& face = mesh->mFaces[j];
@@ -37,8 +40,12 @@ void SkinnedModel::setupBuffers(const aiScene* s) {
 
             }
         }
+    }
+    bones.resize(numVertices);
 
-        //loadBones(mesh);
+    for(unsigned int i = 0; i <  scene->mNumMeshes; ++i) {
+        aiMesh* mesh = scene->mMeshes[i];
+        loadBones(i, mesh);
     }
 
     for(unsigned int i = 0; i < scene->mNumAnimations; ++i) {
@@ -46,11 +53,6 @@ void SkinnedModel::setupBuffers(const aiScene* s) {
 
         std::cout << "Animation duration: " << anim->mDuration << std::endl;
         std::cout << "Animation channels: " << anim->mNumChannels << std::endl;
-        for(unsigned int j = 0; j < anim->mNumChannels; ++j) {
-            aiNodeAnim* node = anim->mChannels[j];
-            std::cout << "-- Node name: " << node->mNodeName.C_Str() << std::endl;
-
-        }
     }
 
     glGenVertexArrays(1, &vao);
@@ -73,7 +75,6 @@ void SkinnedModel::setupBuffers(const aiScene* s) {
 
 
 
-    /*
 
     glGenBuffers(1, &bonesVBO);
     glBindBuffer(GL_ARRAY_BUFFER, bonesVBO);
@@ -84,17 +85,20 @@ void SkinnedModel::setupBuffers(const aiScene* s) {
 
     glEnableVertexAttribArray(4);
     glVertexAttribPointer(4, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (void*) 16);
-    */
 }
 
-void SkinnedModel::loadBones(const aiMesh* pMesh) {
-    int numBones = 0;
+void SkinnedModel::loadBones(uint meshIndex, const aiMesh* pMesh) {
+    std::cout << "-------------------------" << std::endl;
+    std::cout << "Loading bones (" << pMesh->mNumBones << ")" << std::endl;
+
     for(uint i = 0; i < pMesh->mNumBones; i++) {
         uint boneIndex = 0;
         std::string boneName(pMesh->mBones[i]->mName.data);
         std::cout << "Bone: " << boneName << std::endl;
 
+        std::cout << "Searthing for " << boneName << std::endl;
         if(boneMapping.find(boneName) == boneMapping.end()) {
+            std::cout << "Found " << boneName << std::endl;
             boneIndex = numBones;
             numBones++;
             BoneInfo bi;
@@ -107,7 +111,7 @@ void SkinnedModel::loadBones(const aiMesh* pMesh) {
         boneInfo[boneIndex].offsetMatrix = pMesh->mBones[i]->mOffsetMatrix;
 
         for(uint j = 0; j < pMesh->mBones[i]->mNumWeights; j++) {
-            uint vertexID = pMesh->mBones[i]->mWeights[j].mVertexId; // TODO: TOTALLY WRONG
+            uint vertexID = meshEntries[meshIndex].baseVertex + pMesh->mBones[i]->mWeights[j].mVertexId;
             float weight = pMesh->mBones[i]->mWeights[j].mWeight;
             bones[vertexID].addBoneData(boneIndex, weight);
         }
@@ -116,7 +120,7 @@ void SkinnedModel::loadBones(const aiMesh* pMesh) {
 
 void VertexBoneData::addBoneData(uint boneID, float weight) {
     for (uint i = 0 ; i <  NUM_BONES_PER_VERTEX; i++) {
-        if (Weights[i] == 0.0) {
+        if (Weights[i] == 0.0f) {
             IDs[i] = boneID;
             Weights[i] = weight;
             return;
@@ -128,7 +132,7 @@ void VertexBoneData::addBoneData(uint boneID, float weight) {
 }
 
 void SkinnedModel::boneTransform(float timeInSeconds, std::vector<glm::mat4>& transforms) {
-    glm::mat4 identity;
+    glm::mat4 identity(1.0f);
 
     float ticksPerSecond = scene->mAnimations[0]->mTicksPerSecond != 0 ? 
                            scene->mAnimations[0]->mTicksPerSecond : 25.0f;
@@ -137,6 +141,12 @@ void SkinnedModel::boneTransform(float timeInSeconds, std::vector<glm::mat4>& tr
     float animationTime = fmod(timeInTicks, scene->mAnimations[0]->mDuration);
 
     readNodeHierarchy(animationTime, scene->mRootNode, identity);
+
+    transforms.resize(numBones);
+
+    for(uint i = 0; i < numBones; i++) {
+        transforms[i]= boneInfo[i].finalTransformation;
+    }
 }
 
 void SkinnedModel::readNodeHierarchy(float animationTime, const aiNode* pNode, const glm::mat4 parentTransform) {
@@ -181,8 +191,7 @@ void SkinnedModel::readNodeHierarchy(float animationTime, const aiNode* pNode, c
        uint boneIndex = boneMapping[nodeName];
        glm::mat4 offsetMatrix;
        copyAiMatrixToGLM(&(boneInfo[boneIndex].offsetMatrix), offsetMatrix);
-       boneInfo[boneIndex].finalTransformation = globalInverseTransform * globalTransformation *
-                                                 offsetMatrix;
+       boneInfo[boneIndex].finalTransformation = globalInverseTransform * globalTransformation * offsetMatrix;
    }
 
    for(uint i = 0; i < pNode->mNumChildren; i++) {
@@ -191,16 +200,111 @@ void SkinnedModel::readNodeHierarchy(float animationTime, const aiNode* pNode, c
 }
 
 const aiNodeAnim* SkinnedModel::findNodeAnim(const aiAnimation* pAnimation, std::string &nodeName) {
+    for(unsigned int i = 0; i < pAnimation->mNumChannels; ++i) {
+        std::string n(pAnimation->mChannels[i]->mNodeName.data);
+        if(n == nodeName) {
+            return pAnimation->mChannels[i];
+        }
+    }
+    //std::cout << "Warning: did not find " << nodeName << std::endl;
     return NULL;
 }
 
-void SkinnedModel::calcInterpolatedScaling(aiVector3D &scaling, float animationTime, const aiNodeAnim* pNodeAnim) {
+void SkinnedModel::calcInterpolatedScaling(aiVector3D &Out, float AnimationTime, const aiNodeAnim* pNodeAnim) {
+    if (pNodeAnim->mNumScalingKeys == 1) {
+        Out = pNodeAnim->mScalingKeys[0].mValue;
+        return;
+    }
+
+    uint ScalingIndex = FindScaling(AnimationTime, pNodeAnim);
+    uint NextScalingIndex = (ScalingIndex + 1);
+    assert(NextScalingIndex < pNodeAnim->mNumScalingKeys);
+    float DeltaTime = (float)(pNodeAnim->mScalingKeys[NextScalingIndex].mTime - pNodeAnim->mScalingKeys[ScalingIndex].mTime);
+    float Factor = (AnimationTime - (float)pNodeAnim->mScalingKeys[ScalingIndex].mTime) / DeltaTime;
+    //assert(Factor >= 0.0f && Factor <= 1.0f);
+    const aiVector3D& Start = pNodeAnim->mScalingKeys[ScalingIndex].mValue;
+    const aiVector3D& End   = pNodeAnim->mScalingKeys[NextScalingIndex].mValue;
+    aiVector3D Delta = End - Start;
+    Out = Start + Factor * Delta;
 }
 
 void SkinnedModel::calcInterpolatedRotation(aiQuaternion &out, float animationTime, const aiNodeAnim* pNodeAnim) {
+    // we need at least two values to interpolate
+    if(pNodeAnim->mNumRotationKeys == 1) {
+        out = pNodeAnim->mRotationKeys[0].mValue;
+        return;
+    }
+
+    uint rotationIndex = findRotation(animationTime, pNodeAnim);
+    uint nextRotationIndex = rotationIndex + 1;
+    assert(nextRotationIndex < pNodeAnim->mNumRotationKeys);
+    float deltaTime = pNodeAnim->mRotationKeys[nextRotationIndex].mTime - pNodeAnim->mRotationKeys[rotationIndex].mTime;
+
+    float factor = (animationTime - (float) pNodeAnim->mRotationKeys[rotationIndex].mTime) / deltaTime;
+    //assert(factor >= 0.0f && factor <= 1.0f);
+
+    const aiQuaternion& startRotationQ = pNodeAnim->mRotationKeys[rotationIndex].mValue;
+    const aiQuaternion& endRotationQ = pNodeAnim->mRotationKeys[nextRotationIndex].mValue;
+    aiQuaternion::Interpolate(out, startRotationQ, endRotationQ, factor);
+    out = out.Normalize();
+}
+
+uint SkinnedModel::findRotation(float animationTime, const aiNodeAnim* pNodeAnim) {
+    assert(pNodeAnim->mNumRotationKeys > 0);
+
+    for(uint i = 0; i < pNodeAnim->mNumRotationKeys - 1; i++) {
+        if(animationTime < (float)pNodeAnim->mRotationKeys[i+1].mTime) {
+            return i;
+        }
+    }
+
+    assert(0);
 }
 
 void SkinnedModel::calcInterpolatedPosition(aiVector3D &out, float animationTime, const aiNodeAnim* pNodeAnim) {
+    if (pNodeAnim->mNumPositionKeys == 1) {
+        out = pNodeAnim->mPositionKeys[0].mValue;
+        return;
+    }
+            
+    uint positionIndex = findPosition(animationTime, pNodeAnim);
+    uint nextPositionIndex = (positionIndex + 1);
+    assert(nextPositionIndex < pNodeAnim->mNumPositionKeys);
+    float deltaTime = (float)(pNodeAnim->mPositionKeys[nextPositionIndex].mTime - pNodeAnim->mPositionKeys[positionIndex].mTime);
+    float factor = (animationTime - (float)pNodeAnim->mPositionKeys[positionIndex].mTime) / deltaTime;
+    //assert(factor >= 0.0f && factor <= 1.0f);
+    const aiVector3D& start = pNodeAnim->mPositionKeys[positionIndex].mValue;
+    const aiVector3D& end = pNodeAnim->mPositionKeys[nextPositionIndex].mValue;
+    aiVector3D delta = end - start;
+    out = start + factor * delta;
+}
+
+uint SkinnedModel::findPosition(float AnimationTime, const aiNodeAnim* pNodeAnim)
+{    
+    for (uint i = 0 ; i < pNodeAnim->mNumPositionKeys - 1 ; i++) {
+        if (AnimationTime < (float)pNodeAnim->mPositionKeys[i + 1].mTime) {
+            return i;
+        }
+    }
+    
+    assert(0);
+
+    return 0;
+}
+
+uint SkinnedModel::FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim)
+{
+    assert(pNodeAnim->mNumScalingKeys > 0);
+    
+    for (uint i = 0 ; i < pNodeAnim->mNumScalingKeys - 1 ; i++) {
+        if (AnimationTime < (float)pNodeAnim->mScalingKeys[i + 1].mTime) {
+            return i;
+        }
+    }
+    
+    assert(0);
+
+    return 0;
 }
 
 inline void SkinnedModel::copyAiMatrixToGLM(const aiMatrix4x4 *from, glm::mat4 &to)

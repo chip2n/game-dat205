@@ -6,10 +6,10 @@
 
 bool Model::loadFromFile(std::string path) {
     scene = importer.ReadFile(path,
-            aiProcess_CalcTangentSpace |
-            aiProcess_Triangulate |
-            aiProcess_JoinIdenticalVertices |
-            aiProcess_SortByPType |
+            //aiProcess_CalcTangentSpace |
+            //aiProcess_Triangulate |
+            //aiProcess_JoinIdenticalVertices |
+            //aiProcess_SortByPType |
             aiProcess_LimitBoneWeights);
 
     if(!scene) {

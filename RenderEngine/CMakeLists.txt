@@ -31,7 +31,7 @@ set(RENDERENGINE_SRCS
     ${PROJECT_SOURCE_DIR}/ShaderProgram.cpp
     ${PROJECT_SOURCE_DIR}/Camera.cpp
     ${PROJECT_SOURCE_DIR}/Model.cpp
-    ${PROJECT_SOURCE_DIR}/SkinnedModel.cpp
+    #    ${PROJECT_SOURCE_DIR}/SkinnedModel.cpp
     ${PROJECT_SOURCE_DIR}/ModelInstance.cpp
     ${PROJECT_SOURCE_DIR}/Environment.cpp
     ${PROJECT_SOURCE_DIR}/Light.cpp
@@ -42,6 +42,7 @@ set(RENDERENGINE_SRCS
     ${PROJECT_SOURCE_DIR}/InputProcessor.cpp
     ${PROJECT_SOURCE_DIR}/Screen.cpp
     ${PROJECT_SOURCE_DIR}/ScreenTest.cpp
+    ${PROJECT_SOURCE_DIR}/Mesh.cpp
 )
 
 add_library(${PROJECT_NAME} SHARED ${RENDERENGINE_SRCS})

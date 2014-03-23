@@ -58,6 +58,7 @@ static void resize_callback(GLFWwindow* window, int width, int height) {
 }
 
 void printMatrix(glm::mat4 m) {
+    std::cout << "---------------------------------------" << std::endl;
     std::cout << m[0][0] << ", " << m[0][1] << ", " << m[0][2] << ", " << m[0][3] << std::endl;
     std::cout << m[1][0] << ", " << m[1][1] << ", " << m[1][2] << ", " << m[1][3] << std::endl;
     std::cout << m[2][0] << ", " << m[2][1] << ", " << m[2][2] << ", " << m[2][3] << std::endl;
@@ -87,9 +88,9 @@ int main(int argc, const char *argv[]) {
     camera.update();
 
 
-    SkinnedModel monkey;
-    monkey.loadFromFile("assets/unfinished/editable-person.dae");
-    ModelInstance monkeyInstance(&monkey);
+    Mesh monkey;
+    monkey.loadMesh("assets/unfinished/skull.dae");
+    //ModelInstance monkeyInstance(&monkey);
     //monkeyInstance.move(glm::vec3(10,0,0));
 
     Texture texture("assets/textures/bricks.png");
@@ -103,7 +104,7 @@ int main(int argc, const char *argv[]) {
 	while(!glfwWindowShouldClose(window.window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
-        //glEnable(GL_CULL_FACE);
+        glEnable(GL_CULL_FACE);
         glEnable(GL_TEXTURE_2D);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glEnable(GL_BLEND);
@@ -118,6 +119,27 @@ int main(int argc, const char *argv[]) {
 
 
 
+
+
+        std::vector<glm::mat4> transforms;
+        transforms.resize(4);
+        shaderProgram.begin();
+        monkey.boneTransform((float)lastTime, transforms);
+
+        for(uint i = 0; i < transforms.size(); i++) {
+            std::stringstream sstm;
+            sstm << "gBones[" << i << "]";
+            shaderProgram.setUniform(sstm.str().c_str(), transforms[i]);
+        }
+
+        shaderProgram.setUniform("modelViewProjectionMatrix", camera.getCombinedMatrix());
+        glm::mat4 modelM = glm::mat4(1.0f);
+        shaderProgram.setUniform("modelMatrix", modelM);
+        shaderProgram.setUniform("lightPos", env.getLights()[0].getPosition());
+        monkey.render();
+        shaderProgram.end();
+
+        /*
 
         // Bones
         std::vector<glm::mat4> transforms;
@@ -140,6 +162,7 @@ int main(int argc, const char *argv[]) {
         monkeyInstance.render(camera, env, shaderProgram);
         shaderProgram.end();
 
+        */
 		glfwSwapBuffers(window.window);
 		glfwPollEvents();
 	}

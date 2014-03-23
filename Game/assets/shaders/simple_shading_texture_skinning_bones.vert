@@ -17,10 +17,14 @@ uniform mat4 modelMatrix;
 uniform mat4 gBones[MAX_BONES];
 
 void main() {
-    mat4 boneTransform = gBones[boneIDs[0]] * weights[0];
-    boneTransform += gBones[boneIDs[1]] * weights[1];
-    boneTransform += gBones[boneIDs[2]] * weights[2];
-    boneTransform += gBones[boneIDs[3]] * weights[3];
+    mat4 boneTransform = mat4(1.0);
+    if(weights[0] == 0.0 && weights[1] == 0.0 && weights[2] == 0.0 && weights[3] == 0.0) {
+    } else {
+        boneTransform = gBones[boneIDs[0]] * weights[0];
+        boneTransform += gBones[boneIDs[1]] * weights[1];
+        boneTransform += gBones[boneIDs[2]] * weights[2];
+        boneTransform += gBones[boneIDs[3]] * weights[3];
+    }
 
     vec4 pos = boneTransform * vec4(position, 1.0);
     gl_Position = modelViewProjectionMatrix * modelMatrix * pos;

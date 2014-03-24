@@ -81,6 +81,7 @@ int main(int argc, const char *argv[]) {
 
     // Load shaders, yo
     ShaderProgram shaderProgram("assets/shaders/simple_shading_texture_skinning_bones.vert", "assets/shaders/simple_shading_texture_skinning_bones.frag");
+    ShaderProgram staticShader("assets/shaders/simple_shading_texture_skinning.vert", "assets/shaders/simple_shading_texture_skinning.frag");
 
     // Init camera at position (2,3,3) looking at origin, yo
     camera.setPosition(glm::vec3(2,3,3));
@@ -98,6 +99,10 @@ int main(int argc, const char *argv[]) {
     Environment env;
     Light light(glm::vec3(10, 4, 2));
     env.addLight(light);
+
+    Model level;
+    level.loadFromFile("assets/unfinished/tiles.obj");
+    ModelInstance levelInstance(&level);
 
     double lastTime = glfwGetTime();
     double deltaTime = lastTime;
@@ -139,30 +144,9 @@ int main(int argc, const char *argv[]) {
         monkey.render();
         shaderProgram.end();
 
-        /*
 
-        // Bones
-        std::vector<glm::mat4> transforms;
-        transforms.resize(4);
-        shaderProgram.begin();
-        monkey.boneTransform((float)lastTime, transforms);
+        levelInstance.render(camera, env, staticShader);
 
-        for(uint i = 0; i < transforms.size(); i++) {
-            std::stringstream sstm;
-            sstm << "gBones[" << i << "]";
-            shaderProgram.setUniform(sstm.str().c_str(), transforms[i]);
-        }
-        
-
-
-
-
-
-        shaderProgram.begin();
-        monkeyInstance.render(camera, env, shaderProgram);
-        shaderProgram.end();
-
-        */
 		glfwSwapBuffers(window.window);
 		glfwPollEvents();
 	}

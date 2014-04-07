@@ -113,6 +113,7 @@ void Mesh::initMesh(uint meshIndex,
                     vector<uint>& indices)
 {
     const aiVector3D zero3D(0.0f, 0.0f, 0.0f);
+    std::cout << "Mesh vertices: " << paiMesh->mNumVertices << std::endl;
 
     for(uint i = 0; i < paiMesh->mNumVertices; i++) {
         const aiVector3D* pPos      = &(paiMesh->mVertices[i]);

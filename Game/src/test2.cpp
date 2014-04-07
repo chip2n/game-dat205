@@ -145,7 +145,7 @@ int main(int argc, const char *argv[]) {
         shaderProgram.end();
 
 
-        levelInstance.render(camera, env, staticShader);
+        //levelInstance.render(camera, env, staticShader);
 
 		glfwSwapBuffers(window.window);
 		glfwPollEvents();

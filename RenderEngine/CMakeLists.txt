@@ -43,6 +43,7 @@ set(RENDERENGINE_SRCS
     ${PROJECT_SOURCE_DIR}/Screen.cpp
     ${PROJECT_SOURCE_DIR}/ScreenTest.cpp
     ${PROJECT_SOURCE_DIR}/Mesh.cpp
+    ${PROJECT_SOURCE_DIR}/Animation.cpp
 )
 
 add_library(${PROJECT_NAME} SHARED ${RENDERENGINE_SRCS})

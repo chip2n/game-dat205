@@ -7,6 +7,8 @@
 #include <vector>
 #include <map>
 
+#include "Animation.h"
+
 #define NUM_BONES_PER_VERTEX 4
 #define NUM_VBOS 5
 
@@ -50,10 +52,12 @@ class Mesh {
         void loadBones(uint meshIndex, const aiMesh* pMesh, vector<VertexBoneData>& bones);
         GLuint bonesVBO;
         std::map<std::string, uint> boneMapping;
+        std::map<std::string, Animation> animationMap;
         std::vector<BoneInfo> boneInfo;
         std::vector<MeshEntry> meshEntries;
-        void boneTransform(float timeInSeconds, std::vector<glm::mat4>& transforms);
+        void boneTransform(std::string animName, float timeInSeconds, std::vector<glm::mat4>& transforms);
         void render();
+        void addAnimation(Animation animation);
     private:
         uint numBones = 0;
         void readNodeHierarchy(float animationTime, const aiNode* pNode, const glm::mat4 parentTransform);
@@ -82,6 +86,7 @@ class Mesh {
             BONE_VBO,
             NUM_VBO
         };
+
 };
 
 

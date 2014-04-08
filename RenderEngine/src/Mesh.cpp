@@ -178,27 +178,33 @@ void VertexBoneData::addBoneData(uint boneID, float weight) {
     assert(0);
 }
 
-void Mesh::boneTransform(float timeInSeconds, std::vector<glm::mat4>& transforms) {
+void Mesh::boneTransform(std::string animName, float timeInSeconds, std::vector<glm::mat4>& transforms) {
     glm::mat4 identity(1.0f);
 
-    std::cout << "Number of animations: " << mScene->mNumAnimations << std::endl;
+    if(animationMap.find(animName) != animationMap.end()) {
+        Animation anim = animationMap[animName];
 
-    if(mScene->mNumAnimations > 0) {
-        float ticksPerSecond = mScene->mAnimations[0]->mTicksPerSecond != 0 ? 
-                               mScene->mAnimations[0]->mTicksPerSecond : 25.0f;
+        if(mScene->mNumAnimations > 0) {
+            float ticksPerSecond = mScene->mAnimations[0]->mTicksPerSecond != 0 ? 
+                                   mScene->mAnimations[0]->mTicksPerSecond : 25.0f;
 
-        float timeInTicks = timeInSeconds * ticksPerSecond;
-        float animationTime = fmod(timeInTicks, mScene->mAnimations[0]->mDuration);
+            float timeInTicks = timeInSeconds * ticksPerSecond;
+            //float animationTime = fmod(timeInTicks, mScene->mAnimations[0]->mDuration);
+            float animationTime = fmod(timeInTicks, anim.animDuration);
+            animationTime += anim.timePerFrame * anim.startFrame;
 
-        readNodeHierarchy(animationTime, mScene->mRootNode, identity);
+            readNodeHierarchy(animationTime, mScene->mRootNode, identity);
 
-        transforms.resize(numBones);
+            transforms.resize(numBones);
 
-        for(uint i = 0; i < numBones; i++) {
-            transforms[i] = boneInfo[i].finalTransformation;
+            for(uint i = 0; i < numBones; i++) {
+                transforms[i] = boneInfo[i].finalTransformation;
+            }
+        } else {
+            std::cout << "WARNING: using bonetransform without any animations." << std::endl;
         }
     } else {
-        std::cout << "WARNING: using bonetransform without any animations." << std::endl;
+        std::cout << "Error: could not find animation " << animName << std::endl;
     }
 }
 
@@ -396,4 +402,9 @@ void Mesh::render() {
     }
 
     glBindVertexArray(0);
+}
+
+void Mesh::addAnimation(Animation animation) {
+    std::cout << "Adding animation: " << animation.name << std::endl;
+    animationMap[animation.name] = animation;
 }

@@ -91,6 +91,10 @@ int main(int argc, const char *argv[]) {
 
     Mesh monkey;
     monkey.loadMesh("assets/unfinished/skull.dae");
+    Animation restAnim = Animation("rest", 9, 289, 326, 12.0f);
+    monkey.addAnimation(restAnim);
+    Animation runAnim = Animation("run", 289, 326, 326, 16.625f);
+    monkey.addAnimation(runAnim);
     //ModelInstance monkeyInstance(&monkey);
     //monkeyInstance.move(glm::vec3(10,0,0));
 
@@ -129,7 +133,7 @@ int main(int argc, const char *argv[]) {
         std::vector<glm::mat4> transforms;
         transforms.resize(4);
         shaderProgram.begin();
-        monkey.boneTransform((float)lastTime, transforms);
+        monkey.boneTransform("run", (float)lastTime, transforms);
 
         for(uint i = 0; i < transforms.size(); i++) {
             std::stringstream sstm;

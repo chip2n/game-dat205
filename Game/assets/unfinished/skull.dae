@@ -3,10 +3,10 @@
   <asset>
     <contributor>
       <author>Blender User</author>
-      <authoring_tool>Blender 2.70.0 commit date:2014-03-05, commit time:18:37, hash:19f7f9a</authoring_tool>
+      <authoring_tool>Blender 2.70.0 commit date:2014-03-19, commit time:05:02, hash:19e627c</authoring_tool>
     </contributor>
-    <created>2014-04-08T10:08:54</created>
-    <modified>2014-04-08T10:08:54</modified>
+    <created>2014-04-08T11:01:08</created>
+    <modified>2014-04-08T11:01:08</modified>
     <unit name="meter" meter="1"/>
     <up_axis>Z_UP</up_axis>
   </asset>

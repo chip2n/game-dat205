@@ -181,6 +181,8 @@ void VertexBoneData::addBoneData(uint boneID, float weight) {
 void Mesh::boneTransform(float timeInSeconds, std::vector<glm::mat4>& transforms) {
     glm::mat4 identity(1.0f);
 
+    std::cout << "Number of animations: " << mScene->mNumAnimations << std::endl;
+
     if(mScene->mNumAnimations > 0) {
         float ticksPerSecond = mScene->mAnimations[0]->mTicksPerSecond != 0 ? 
                                mScene->mAnimations[0]->mTicksPerSecond : 25.0f;

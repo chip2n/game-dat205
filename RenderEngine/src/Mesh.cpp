@@ -74,7 +74,9 @@ bool Mesh::initFromScene(const aiScene* scene, const string& fileName) {
     }
     */
 
-    //TODO: materials here
+    if(!initMaterials(scene, fileName)) {
+        return false;
+    }
     
     glBindBuffer(GL_ARRAY_BUFFER, buffers[POS_VBO]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(positions[0])* positions.size(), &positions[0], GL_STATIC_DRAW);
@@ -102,6 +104,59 @@ bool Mesh::initFromScene(const aiScene* scene, const string& fileName) {
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices[0]) * indices.size(), &indices[0], GL_STATIC_DRAW);
 
     return true;
+}
+
+bool Mesh::initMaterials(const aiScene* pScene, const string& fileName) {
+    string::size_type slashIndex = fileName.find_last_of("/");
+    string dir;
+
+    if(slashIndex == string::npos) {
+        dir = ".";
+    } else if(slashIndex == 0) {
+        dir = "/";
+    } else {
+        dir = fileName.substr(0, slashIndex);
+    }
+
+    bool ret = true;
+
+    for(uint i = 0; i < pScene->mNumMaterials; i++) {
+        const aiMaterial* pMaterial = pScene->mMaterials[i];
+
+        textures.resize(pScene->mNumMaterials);
+        textures[i] = NULL;
+
+        if(pMaterial->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
+            aiString path;
+
+            if(pMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) {
+            std::cout << "RFDG" << std::endl;
+                string p(path.data);
+
+                if(p.substr(0,2) == ".\\") {
+                    p = p.substr(2, p.size() - 2);
+                }
+
+                string fullPath = dir + "/" + p;
+
+                std::cout << "Loading texture: " << fullPath << std::endl;
+                textures[i] = new Texture(fullPath);
+
+                /*
+                if(!textures[i]->load()) {
+                    std::cout << "Error loading texture " << fullPath << std::endl;
+                    delete textures[i];
+                    textures[i] = NULL;
+                    ret = false;
+                } else {
+                    std::cout << "Loaded texture " << fullPath << std::endl;
+                }
+                */
+            }
+        }
+    }
+
+    return ret;
 }
 
 void Mesh::initMesh(uint meshIndex,
@@ -190,8 +245,19 @@ void Mesh::boneTransform(std::string animName, float timeInSeconds, std::vector<
 
             float timeInTicks = timeInSeconds * ticksPerSecond;
             //float animationTime = fmod(timeInTicks, mScene->mAnimations[0]->mDuration);
-            float animationTime = fmod(timeInTicks, anim.animDuration);
-            animationTime += anim.timePerFrame * anim.startFrame;
+
+            float totalDuration = mScene->mAnimations[0]->mDuration;
+            float secondsPerFrame = totalDuration / anim.totalFrames;
+            float startTime = anim.startFrame * secondsPerFrame;
+            float endTime = anim.endFrame * secondsPerFrame;
+            float duration = anim.endFrame * secondsPerFrame - startTime;
+
+            float animationTime = fmod(timeInTicks, totalDuration - (totalDuration - endTime) - startTime);
+            animationTime += startTime;
+
+
+            //float animationTime = fmod(timeInTicks, anim.animDuration);
+            //animationTime += anim.timePerFrame * anim.startFrame;
 
             readNodeHierarchy(animationTime, mScene->mRootNode, identity);
 
@@ -393,6 +459,11 @@ void Mesh::render() {
 
     for(uint i = 0; i < meshEntries.size(); i++) {
         const uint materialIndex = meshEntries[i].materialIndex;
+        assert(materialIndex < textures.size());
+
+        if(textures[materialIndex]) {
+            textures[materialIndex]->bind();
+        }
         
         glDrawElementsBaseVertex(GL_TRIANGLES,
                                  meshEntries[i].numIndices,

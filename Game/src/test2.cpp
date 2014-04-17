@@ -91,9 +91,9 @@ int main(int argc, const char *argv[]) {
 
     Mesh monkey;
     monkey.loadMesh("assets/unfinished/skull.dae");
-    Animation restAnim = Animation("rest", 9, 289, 326, 12.0f);
+    Animation restAnim = Animation("rest", 9, 249, 333, 12.1f);
     monkey.addAnimation(restAnim);
-    Animation runAnim = Animation("run", 289, 326, 326, 16.625f);
+    Animation runAnim = Animation("run", 296, 328, 328, 9.0f);
     monkey.addAnimation(runAnim);
     //ModelInstance monkeyInstance(&monkey);
     //monkeyInstance.move(glm::vec3(10,0,0));
@@ -105,7 +105,7 @@ int main(int argc, const char *argv[]) {
     env.addLight(light);
 
     Model level;
-    level.loadFromFile("assets/unfinished/tiles.obj");
+    level.loadFromFile("assets/unfinished/testmap.obj");
     ModelInstance levelInstance(&level);
 
     double lastTime = glfwGetTime();
@@ -126,10 +126,6 @@ int main(int argc, const char *argv[]) {
         camera.move(10*(float)deltaTime * (camera.getRight() * movementDirection.x));
         camera.update();
 
-
-
-
-
         std::vector<glm::mat4> transforms;
         transforms.resize(4);
         shaderProgram.begin();
@@ -149,7 +145,7 @@ int main(int argc, const char *argv[]) {
         shaderProgram.end();
 
 
-        //levelInstance.render(camera, env, staticShader);
+        levelInstance.render(camera, env, staticShader);
 
 		glfwSwapBuffers(window.window);
 		glfwPollEvents();

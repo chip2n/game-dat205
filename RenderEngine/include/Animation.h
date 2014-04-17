@@ -12,6 +12,8 @@ class Animation {
         std::string name;
         float timePerFrame;
         int startFrame;
+        int endFrame;
+        int totalFrames;
     private:
 };
 

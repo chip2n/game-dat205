@@ -8,6 +8,7 @@
 #include <map>
 
 #include "Animation.h"
+#include "Texture.h"
 
 #define NUM_BONES_PER_VERTEX 4
 #define NUM_VBOS 5
@@ -56,6 +57,7 @@ class Mesh {
         std::vector<BoneInfo> boneInfo;
         std::vector<MeshEntry> meshEntries;
         void boneTransform(std::string animName, float timeInSeconds, std::vector<glm::mat4>& transforms);
+        bool initMaterials(const aiScene* pScene, const string& fileName);
         void render();
         void addAnimation(Animation animation);
     private:
@@ -75,6 +77,7 @@ class Mesh {
         GLuint vao;
         GLuint buffers[NUM_VBOS];
 
+        std::vector<Texture*> textures;
         const aiScene* mScene;
         Assimp::Importer importer;
 

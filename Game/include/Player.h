@@ -2,13 +2,18 @@
 #define PLAYER_H
 
 #include <glm/glm.hpp>
+#include "DynamicGameObject.h"
 
-class Player {
+#define MAX_HITPOINTS 100
+#define START_X 0
+#define START_Y 0
+#define START_Z 0
+
+class Player : public DynamicGameObject {
     public:
-        float hp;
-        glm::vec3 position;
-        glm::vec3 rotation;
+        Player() : DynamicGameObject(), hp(MAX_HITPOINTS) {}
     private:
+        float hp;
 };
 
 #endif

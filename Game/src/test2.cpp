@@ -1,9 +1,12 @@
 #include "RenderEngine.h"
+#include "Player.h"
 #include <sstream>
 
 Camera camera(45.0f, 640, 480);
+Player player;
 
 glm::vec3 movementDirection;
+glm::vec3 playerMovementDirection;
 void key_callback(int key, int action) {
     /*
 	if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
@@ -37,6 +40,18 @@ void key_callback(int key, int action) {
         } else {
             movementDirection.x = 0;
         }
+    }
+    if(key == GLFW_KEY_UP) {
+        playerMovementDirection.z = -1;
+    }
+    if(key == GLFW_KEY_DOWN) {
+        playerMovementDirection.z = 1;
+    }
+    if(key == GLFW_KEY_LEFT) {
+        playerMovementDirection.x = -1;
+    }
+    if(key == GLFW_KEY_RIGHT) {
+        playerMovementDirection.x = 1;
     }
 }
 
@@ -83,8 +98,7 @@ int main(int argc, const char *argv[]) {
     ShaderProgram shaderProgram("assets/shaders/simple_shading_texture_skinning_bones.vert", "assets/shaders/simple_shading_texture_skinning_bones.frag");
     ShaderProgram staticShader("assets/shaders/simple_shading_texture_skinning.vert", "assets/shaders/simple_shading_texture_skinning.frag");
 
-    // Init camera at position (2,3,3) looking at origin, yo
-    camera.setPosition(glm::vec3(2,3,3));
+    camera.setPosition(glm::vec3(0,5,10));
     camera.lookAt(glm::vec3(0,0,0));
     camera.update();
 
@@ -108,6 +122,7 @@ int main(int argc, const char *argv[]) {
     level.loadFromFile("assets/unfinished/testmap.obj");
     ModelInstance levelInstance(&level);
 
+
     double lastTime = glfwGetTime();
     double deltaTime = lastTime;
 	while(!glfwWindowShouldClose(window.window)) {
@@ -126,6 +141,8 @@ int main(int argc, const char *argv[]) {
         camera.move(10*(float)deltaTime * (camera.getRight() * movementDirection.x));
         camera.update();
 
+        player.move(playerMovementDirection);
+
         std::vector<glm::mat4> transforms;
         transforms.resize(4);
         shaderProgram.begin();
@@ -138,7 +155,8 @@ int main(int argc, const char *argv[]) {
         }
 
         shaderProgram.setUniform("modelViewProjectionMatrix", camera.getCombinedMatrix());
-        glm::mat4 modelM = glm::mat4(1.0f);
+        glm::mat4 modelM;
+        modelM = glm::translate(modelM, player.getPosition());
         shaderProgram.setUniform("modelMatrix", modelM);
         shaderProgram.setUniform("lightPos", env.getLights()[0].getPosition());
         monkey.render();
@@ -146,6 +164,9 @@ int main(int argc, const char *argv[]) {
 
 
         levelInstance.render(camera, env, staticShader);
+
+        std::cout << "Player position: (" << player.getPosition().x << "," << player.getPosition().y << "," << player.getPosition().z << ")" << std::endl;
+        player.update(deltaTime);
 
 		glfwSwapBuffers(window.window);
 		glfwPollEvents();

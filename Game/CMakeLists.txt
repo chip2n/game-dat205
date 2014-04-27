@@ -20,6 +20,8 @@ set(RENDERENGINE "RenderEngine")
 set(GAME_SRCS 
     ${PROJECT_SOURCE_DIR}/test2.cpp
     ${PROJECT_SOURCE_DIR}/Player.cpp
+    ${PROJECT_SOURCE_DIR}/GameObject.cpp
+    ${PROJECT_SOURCE_DIR}/DynamicGameObject.cpp
 )
 
 add_executable(${PROJECT_NAME} ${GAME_SRCS})

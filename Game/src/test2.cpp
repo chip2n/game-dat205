@@ -7,6 +7,8 @@ Player player;
 
 glm::vec3 movementDirection;
 glm::vec3 playerMovementDirection;
+glm::vec3 playerForward = glm::vec3(0,0,-1);
+float playerRotation;
 void key_callback(int key, int action) {
     /*
 	if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
@@ -42,16 +44,41 @@ void key_callback(int key, int action) {
         }
     }
     if(key == GLFW_KEY_UP) {
-        playerMovementDirection.z = -1;
+        if(action == GLFW_PRESS || action == GLFW_REPEAT) {
+            playerRotation = 0.0f;
+            playerMovementDirection.z = -1;
+        } else {
+            playerMovementDirection.z = 0;
+        }
     }
     if(key == GLFW_KEY_DOWN) {
-        playerMovementDirection.z = 1;
+        if(action == GLFW_PRESS || action == GLFW_REPEAT) {
+            playerRotation = 180.0f;
+            playerMovementDirection.z = 1;
+        } else {
+            playerMovementDirection.z = 0;
+        }
     }
     if(key == GLFW_KEY_LEFT) {
-        playerMovementDirection.x = -1;
+        if(action == GLFW_PRESS || action == GLFW_REPEAT) {
+            playerRotation = 270.0f;
+            playerMovementDirection.x = -1;
+        } else {
+            playerMovementDirection.x = 0;
+        }
     }
     if(key == GLFW_KEY_RIGHT) {
-        playerMovementDirection.x = 1;
+        if(action == GLFW_PRESS || action == GLFW_REPEAT) {
+            playerRotation = 90.0f;
+            playerMovementDirection.x = 1;
+        } else {
+            playerMovementDirection.x = 0;
+        }
+    }
+
+    if(playerMovementDirection != glm::vec3(0)) {
+        playerForward = playerMovementDirection;
+        playerForward.x = -playerForward.x;
     }
 }
 
@@ -60,9 +87,9 @@ static void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     double deltaX = xpos - lastX;
     double deltaY = ypos - lastY;
 
-    camera.rotate(glm::vec3(0,1,0), -deltaX/10);
-    camera.rotate(camera.getRight(), -deltaY/10);
-    camera.update();
+    //camera.rotate(glm::vec3(0,1,0), -deltaX/10);
+    //camera.rotate(camera.getRight(), -deltaY/10);
+    //camera.update();
 
     lastX = xpos;
     lastY = ypos;
@@ -98,8 +125,7 @@ int main(int argc, const char *argv[]) {
     ShaderProgram shaderProgram("assets/shaders/simple_shading_texture_skinning_bones.vert", "assets/shaders/simple_shading_texture_skinning_bones.frag");
     ShaderProgram staticShader("assets/shaders/simple_shading_texture_skinning.vert", "assets/shaders/simple_shading_texture_skinning.frag");
 
-    camera.setPosition(glm::vec3(0,5,10));
-    camera.lookAt(glm::vec3(0,0,0));
+    camera.setPosition(glm::vec3(0,30,25));
     camera.update();
 
 
@@ -125,6 +151,8 @@ int main(int argc, const char *argv[]) {
 
     double lastTime = glfwGetTime();
     double deltaTime = lastTime;
+    double runTime = 0;
+    double restTime = 0;
 	while(!glfwWindowShouldClose(window.window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
@@ -137,16 +165,30 @@ int main(int argc, const char *argv[]) {
         deltaTime = glfwGetTime() - lastTime;
         lastTime = glfwGetTime();
 
-        camera.move(10*(float)deltaTime * (camera.getDirection() * movementDirection.y));
-        camera.move(10*(float)deltaTime * (camera.getRight() * movementDirection.x));
-        camera.update();
+        //camera.move(10*(float)deltaTime * (camera.getDirection() * movementDirection.y));
+        //camera.move(10*(float)deltaTime * (camera.getRight() * movementDirection.x));
 
         player.move(playerMovementDirection);
+        player.setRotation(playerRotation);
+        player.update(deltaTime);
+
+        camera.move((float)deltaTime * 10.0f * playerMovementDirection);
+        camera.lookAt(player.getPosition());
+        camera.update();
 
         std::vector<glm::mat4> transforms;
         transforms.resize(4);
         shaderProgram.begin();
-        monkey.boneTransform("run", (float)lastTime, transforms);
+
+        if(playerMovementDirection != glm::vec3(0)) {
+            runTime += deltaTime;
+            restTime = 0;
+            monkey.boneTransform("run", (float)runTime, transforms);
+        } else {
+            runTime = 0;
+            restTime += deltaTime;
+            monkey.boneTransform("rest", (float)restTime, transforms);
+        }
 
         for(uint i = 0; i < transforms.size(); i++) {
             std::stringstream sstm;
@@ -154,19 +196,14 @@ int main(int argc, const char *argv[]) {
             shaderProgram.setUniform(sstm.str().c_str(), transforms[i]);
         }
 
-        shaderProgram.setUniform("modelViewProjectionMatrix", camera.getCombinedMatrix());
-        glm::mat4 modelM;
-        modelM = glm::translate(modelM, player.getPosition());
-        shaderProgram.setUniform("modelMatrix", modelM);
-        shaderProgram.setUniform("lightPos", env.getLights()[0].getPosition());
-        monkey.render();
+        monkey.render(shaderProgram, camera, env, player.getPosition(), glm::vec3(0,1,0), player.getRotation());
         shaderProgram.end();
 
 
         levelInstance.render(camera, env, staticShader);
 
-        std::cout << "Player position: (" << player.getPosition().x << "," << player.getPosition().y << "," << player.getPosition().z << ")" << std::endl;
-        player.update(deltaTime);
+        //std::cout << "Player position: (" << player.getPosition().x << "," << player.getPosition().y << "," << player.getPosition().z << ")" << std::endl;
+
 
 		glfwSwapBuffers(window.window);
 		glfwPollEvents();

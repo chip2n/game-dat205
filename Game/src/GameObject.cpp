@@ -4,14 +4,16 @@ void GameObject::setPosition(glm::vec3 pos) {
     position = pos;
 }
 
-void GameObject::setRotation(glm::vec3 rot) {
-    rotation = rot;
+void GameObject::setRotation(float angle) {
+    //deltaRot = rotation - rot;
+
+    rotation = angle;
 }
 
 glm::vec3 GameObject::getPosition() {
     return position;
 }
 
-glm::vec3 GameObject::getRotation() {
+float GameObject::getRotation() {
     return rotation;
 }

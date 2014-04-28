@@ -6,12 +6,12 @@
 class GameObject {
     public:
         void setPosition(glm::vec3 pos);
-        void setRotation(glm::vec3 rot);
+        void setRotation(float angle);
         glm::vec3 getPosition();
-        glm::vec3 getRotation();
+        float getRotation();
     private:
         glm::vec3 position;
-        glm::vec3 rotation;
+        float rotation;
 };
 
 #endif

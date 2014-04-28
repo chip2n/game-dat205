@@ -9,6 +9,9 @@
 
 #include "Animation.h"
 #include "Texture.h"
+#include "ShaderProgram.h"
+#include "Camera.h"
+#include "Environment.h"
 
 #define NUM_BONES_PER_VERTEX 4
 #define NUM_VBOS 5
@@ -58,7 +61,7 @@ class Mesh {
         std::vector<MeshEntry> meshEntries;
         void boneTransform(std::string animName, float timeInSeconds, std::vector<glm::mat4>& transforms);
         bool initMaterials(const aiScene* pScene, const string& fileName);
-        void render();
+        void render(ShaderProgram &shaderProgram, Camera &camera, Environment &env, glm::vec3 position, glm::vec3 up, float rotation);
         void addAnimation(Animation animation);
     private:
         uint numBones = 0;

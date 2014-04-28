@@ -78,7 +78,7 @@ void key_callback(int key, int action) {
     if(key == GLFW_KEY_RIGHT) {
         if(action == GLFW_PRESS) {
             numKeys++;
-            playerRotation += -90.0f;
+            playerRotation += 270.0f;
             playerMovementDirection.x = 1;
         } else if(action == GLFW_RELEASE) {
             playerMovementDirection.x = 0;
@@ -87,15 +87,20 @@ void key_callback(int key, int action) {
     }
 
     if(numKeys > 0) {
-        playerRotation = playerMovementDirection.x * -90.0f;
+        //playerRotation = playerMovementDirection.x * -90.0f;
+        if(playerMovementDirection.x == -1) playerRotation = 90.0f;
+        if(playerMovementDirection.x == 1)  playerRotation = 270.0f;
+        if(playerMovementDirection.z == 1)  playerRotation = 180.0f;
+        if(playerMovementDirection.z == -1) playerRotation = 0.0f;
+/*
         if(playerMovementDirection.z > 0) {
             playerRotation += 180.0f;
             if(playerMovementDirection.x > 0) {
-                playerRotation -= 315.0f;
+                playerRotation -= 325.0f;
             }
         }
-        std::cout << numKeys << std::endl;
         playerRotation = playerRotation / numKeys;
+        */
     }
 
     if(playerMovementDirection != glm::vec3(0)) {
@@ -147,7 +152,7 @@ int main(int argc, const char *argv[]) {
     ShaderProgram shaderProgram("assets/shaders/simple_shading_texture_skinning_bones.vert", "assets/shaders/simple_shading_texture_skinning_bones.frag");
     ShaderProgram staticShader("assets/shaders/simple_shading_texture_skinning.vert", "assets/shaders/simple_shading_texture_skinning.frag");
 
-    camera.setPosition(glm::vec3(0,30,25));
+    camera.setPosition(glm::vec3(0,5,4));
     camera.update();
 
 
@@ -167,8 +172,14 @@ int main(int argc, const char *argv[]) {
     env.addLight(light);
 
     Model level;
-    level.loadFromFile("assets/unfinished/testmap.obj");
+    level.loadFromFile("assets/unfinished/cube.obj");
     ModelInstance levelInstance(&level);
+    levelInstance.move(glm::vec3(0,-5,0));
+
+    Model levelCollision;
+    levelCollision.loadFromFile("assets/unfinished/cube_collision.obj");
+
+
 
 
     double lastTime = glfwGetTime();
@@ -187,14 +198,15 @@ int main(int argc, const char *argv[]) {
         deltaTime = glfwGetTime() - lastTime;
         lastTime = glfwGetTime();
 
-        //camera.move(10*(float)deltaTime * (camera.getDirection() * movementDirection.y));
-        //camera.move(10*(float)deltaTime * (camera.getRight() * movementDirection.x));
-
         player.rotate(playerRotation);
-        player.move(playerMovementDirection);
+        if(playerMovementDirection != glm::vec3(0)) {
+            player.move(glm::normalize(playerMovementDirection));
+            camera.move((float)deltaTime * 3.0f * glm::normalize(playerMovementDirection));
+        } else {
+            player.move(glm::vec3(0));
+        }
         player.update(deltaTime);
 
-        camera.move((float)deltaTime * 10.0f * playerMovementDirection);
         camera.lookAt(player.getPosition());
         camera.update();
 
@@ -232,3 +244,11 @@ int main(int argc, const char *argv[]) {
 	}
 }
 
+bool pointInsideMaze(Model &maze, glm::vec3 point) {
+    for(int i = 0; i < maze.positions.size(); i++) {
+        glm::vec3 p = maze.positions[i];
+        std::cout << "Position: (" << p.x << "," << p.y << "," << p.z << ")" << std::endl;
+
+
+    }
+}

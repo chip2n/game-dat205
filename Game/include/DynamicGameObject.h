@@ -11,7 +11,10 @@ class DynamicGameObject : public GameObject {
         void move(glm::vec3 vec);
         void rotate(float angle);
         virtual void update(float deltaTime);
+        bool rotationFinished = false;
         glm::quat currentRotation;
+        float turnSpeed = 5.0f;
+        float speed = 3.0f;
     private:
         float rotStartTime;
         glm::vec3 currentMovement;

@@ -9,6 +9,7 @@ glm::vec3 movementDirection;
 glm::vec3 playerMovementDirection;
 glm::vec3 playerForward = glm::vec3(0,0,-1);
 float playerRotation;
+int numKeys = 0;
 void key_callback(int key, int action) {
     /*
 	if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
@@ -43,37 +44,58 @@ void key_callback(int key, int action) {
             movementDirection.x = 0;
         }
     }
+    float oldRotation = playerRotation;
     if(key == GLFW_KEY_UP) {
-        if(action == GLFW_PRESS || action == GLFW_REPEAT) {
-            playerRotation = 0.0f;
+        if(action == GLFW_PRESS) {
+            numKeys++;
+            playerRotation += 0.0f;
             playerMovementDirection.z = -1;
-        } else {
+        } else if(action == GLFW_RELEASE) {
             playerMovementDirection.z = 0;
+            numKeys--;
         }
     }
     if(key == GLFW_KEY_DOWN) {
-        if(action == GLFW_PRESS || action == GLFW_REPEAT) {
-            playerRotation = 180.0f;
+        if(action == GLFW_PRESS) {
+            numKeys++;
+            playerRotation += 180.0f;
             playerMovementDirection.z = 1;
-        } else {
+        } else if(action == GLFW_RELEASE) {
             playerMovementDirection.z = 0;
+            numKeys--;
         }
     }
     if(key == GLFW_KEY_LEFT) {
-        if(action == GLFW_PRESS || action == GLFW_REPEAT) {
-            playerRotation = 270.0f;
+        if(action == GLFW_PRESS) {
+            numKeys++;
+            playerRotation += 90.0f;
             playerMovementDirection.x = -1;
-        } else {
+        } else if(action == GLFW_RELEASE) {
             playerMovementDirection.x = 0;
+            numKeys--;
         }
     }
     if(key == GLFW_KEY_RIGHT) {
-        if(action == GLFW_PRESS || action == GLFW_REPEAT) {
-            playerRotation = 90.0f;
+        if(action == GLFW_PRESS) {
+            numKeys++;
+            playerRotation += -90.0f;
             playerMovementDirection.x = 1;
-        } else {
+        } else if(action == GLFW_RELEASE) {
             playerMovementDirection.x = 0;
+            numKeys--;
         }
+    }
+
+    if(numKeys > 0) {
+        playerRotation = playerMovementDirection.x * -90.0f;
+        if(playerMovementDirection.z > 0) {
+            playerRotation += 180.0f;
+            if(playerMovementDirection.x > 0) {
+                playerRotation -= 315.0f;
+            }
+        }
+        std::cout << numKeys << std::endl;
+        playerRotation = playerRotation / numKeys;
     }
 
     if(playerMovementDirection != glm::vec3(0)) {
@@ -168,8 +190,8 @@ int main(int argc, const char *argv[]) {
         //camera.move(10*(float)deltaTime * (camera.getDirection() * movementDirection.y));
         //camera.move(10*(float)deltaTime * (camera.getRight() * movementDirection.x));
 
+        player.rotate(playerRotation);
         player.move(playerMovementDirection);
-        player.setRotation(playerRotation);
         player.update(deltaTime);
 
         camera.move((float)deltaTime * 10.0f * playerMovementDirection);
@@ -196,7 +218,7 @@ int main(int argc, const char *argv[]) {
             shaderProgram.setUniform(sstm.str().c_str(), transforms[i]);
         }
 
-        monkey.render(shaderProgram, camera, env, player.getPosition(), glm::vec3(0,1,0), player.getRotation());
+        monkey.render(shaderProgram, camera, env, player.getPosition(), glm::vec3(0,1,0), player.currentRotation);
         shaderProgram.end();
 
 

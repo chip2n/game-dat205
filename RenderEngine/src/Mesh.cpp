@@ -454,13 +454,13 @@ inline void Mesh::copyAiMatrixToGLM(const aiMatrix3x3 *from, glm::mat3 &to)
     to[2][2] = (GLfloat)from->c3; 
 }
 
-void Mesh::render(ShaderProgram &shaderProgram, Camera &camera, Environment &env, glm::vec3 position, glm::vec3 up, float rotation) {
+void Mesh::render(ShaderProgram &shaderProgram, Camera &camera, Environment &env, glm::vec3 position, glm::vec3 up, glm::quat rotation) {
     shaderProgram.begin();
     shaderProgram.setUniform("modelViewProjectionMatrix", camera.getCombinedMatrix());
 
     glm::mat4 modelM;
     modelM = glm::translate(modelM, position);
-    //modelM = modelM * glm::lookAt(glm::vec3(0,0,0), forward, up);
+    modelM = modelM * glm::toMat4(rotation);
     shaderProgram.setUniform("modelMatrix", modelM);
     shaderProgram.setUniform("lightPos", env.getLights()[0].getPosition());
 

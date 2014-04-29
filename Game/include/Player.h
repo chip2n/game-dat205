@@ -12,8 +12,11 @@
 class Player : public DynamicGameObject {
     public:
         Player() : DynamicGameObject(), hp(MAX_HITPOINTS) {}
+        void setControllable(bool b);
+        bool isControllable();
     private:
         float hp;
+        bool controllable = true;
 };
 
 #endif

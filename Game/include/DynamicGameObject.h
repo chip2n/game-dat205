@@ -9,18 +9,23 @@ class DynamicGameObject : public GameObject {
     public:
         DynamicGameObject() : GameObject() {}
         void move(glm::vec3 vec);
-        void rotate(float angle);
+        void rotate(float angle, glm::vec3 axis, float duration);
         virtual void update(float deltaTime);
         bool rotationFinished = false;
-        glm::quat currentRotation;
+        glm::vec3 rotAxis = glm::vec3(0,1,0);
+        glm::vec3 oldRotAxis = glm::vec3(0,1,0);
         float turnSpeed = 5.0f;
         float speed = 3.0f;
+        glm::quat oldRotation;
+        glm::quat currentRotation;
+        glm::quat goalRotation;
+        float rotationDuration = 1.0f;
+        void stop();
+        glm::vec3 up = glm::vec3(0,1,0);
     private:
         float rotStartTime;
         glm::vec3 currentMovement;
         glm::vec3 goalMovement;
-        float oldRotation;
-        glm::vec3 up = glm::vec3(0,1,0);
         float smoothFactor;
 };
 

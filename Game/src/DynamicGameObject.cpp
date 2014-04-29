@@ -9,12 +9,19 @@ void DynamicGameObject::move(glm::vec3 vec) {
     currentMovement = vec;
 }
 
-void DynamicGameObject::rotate(float angle) {
-    if(rotationFinished && oldRotation != angle) {
+void DynamicGameObject::rotate(float angle, glm::vec3 axis, float duration) {
+    if(glm::angle(oldRotation) != angle) {
+        rotationDuration = duration;
         rotationFinished = false;
-        oldRotation = getRotation();
-        setRotation(angle);
+        oldRotation = currentRotation;
+        float oldAngle = glm::angle(oldRotation);
+        //oldRotAxis = rotAxis;
+        goalRotation = glm::angleAxis(angle, axis);
         rotStartTime = 0;
+        //rotAxis = axis;
+        //std::cout << "Rotation from " << glm::angle(oldRotation) << " to " << glm::angle(goalRotation) << std::endl;
+
+
     }
 }
 
@@ -22,28 +29,26 @@ void DynamicGameObject::update(float deltaTime) {
     rotStartTime += deltaTime;
     setPosition(getPosition() + currentMovement * deltaTime * speed);
 
-    if(oldRotation >= 180.0f && getRotation() == 0.0f) {
-        oldRotation = oldRotation - 360.0f;
+    float factor = abs(glm::angle(goalRotation) - glm::angle(oldRotation)) / 90.0f;
+
+    factor = factor == 0.0f ? factor = 1.0f : factor;
+
+    // Check if the rotation will take the long path - if so, negate goal rotation
+    // to avoid this.
+    if(glm::dot(oldRotation, goalRotation) < 0.0f) {
+        goalRotation = -goalRotation;
     }
 
-    if(oldRotation < 90.0f && getRotation() >= 180.0f) {
-        setRotation(getRotation() - 360.0f);
-    }
-
-    glm::quat rotQuat = glm::angleAxis(getRotation(), up);
-    glm::quat oldRotQuat = glm::angleAxis(oldRotation, up);
-
-    float factor = abs(getRotation() - oldRotation) / 90.0f;
-
-    if(factor == 0.0f) {
-        factor = 1.0f;
-    }
-
-
-    if(turnSpeed*factor*rotStartTime >= 1.0f) {
+    if(rotStartTime/rotationDuration >= 1.0f) {
         rotationFinished = true;
-        currentRotation = rotQuat;
+        currentRotation = goalRotation;
     } else {
-        currentRotation = glm::mix(oldRotQuat, rotQuat, turnSpeed*factor*rotStartTime);
+        currentRotation = glm::mix(oldRotation, goalRotation, rotStartTime / rotationDuration);
     }
+}
+
+void DynamicGameObject::stop() {
+    goalRotation = currentRotation;
+    currentMovement = glm::vec3(0,0,0);
+    goalMovement = currentMovement;
 }

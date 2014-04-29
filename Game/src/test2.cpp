@@ -1,6 +1,7 @@
 #include "RenderEngine.h"
 #include "Player.h"
 #include <sstream>
+#include <cmath>
 
 Camera camera(45.0f, 640, 480);
 Player player;
@@ -16,39 +17,11 @@ void key_callback(int key, int action) {
 		glfwSetWindowShouldClose(window, GL_TRUE);
         */
 
-    if(key == GLFW_KEY_W) {
-        if(action == GLFW_PRESS || action == GLFW_REPEAT) {
-            movementDirection.y = 1;
-        } else {
-            movementDirection.y = 0;
-        }
-    }
-    if(key == GLFW_KEY_S) {
-        if(action == GLFW_PRESS || action == GLFW_REPEAT) {
-            movementDirection.y = -1;
-        } else {
-            movementDirection.y = 0;
-        }
-    }
-    if(key == GLFW_KEY_A) {
-        if(action == GLFW_PRESS || action == GLFW_REPEAT) {
-            movementDirection.x = -1;
-        } else {
-            movementDirection.x = 0;
-        }
-    }
-    if(key == GLFW_KEY_D) {
-        if(action == GLFW_PRESS || action == GLFW_REPEAT) {
-            movementDirection.x = 1;
-        } else {
-            movementDirection.x = 0;
-        }
-    }
     float oldRotation = playerRotation;
+    glm::vec2 oldP = glm::vec2(playerMovementDirection.x, playerMovementDirection.z);
     if(key == GLFW_KEY_UP) {
         if(action == GLFW_PRESS) {
             numKeys++;
-            playerRotation += 0.0f;
             playerMovementDirection.z = -1;
         } else if(action == GLFW_RELEASE) {
             playerMovementDirection.z = 0;
@@ -58,7 +31,6 @@ void key_callback(int key, int action) {
     if(key == GLFW_KEY_DOWN) {
         if(action == GLFW_PRESS) {
             numKeys++;
-            playerRotation += 180.0f;
             playerMovementDirection.z = 1;
         } else if(action == GLFW_RELEASE) {
             playerMovementDirection.z = 0;
@@ -68,7 +40,6 @@ void key_callback(int key, int action) {
     if(key == GLFW_KEY_LEFT) {
         if(action == GLFW_PRESS) {
             numKeys++;
-            playerRotation += 90.0f;
             playerMovementDirection.x = -1;
         } else if(action == GLFW_RELEASE) {
             playerMovementDirection.x = 0;
@@ -78,7 +49,6 @@ void key_callback(int key, int action) {
     if(key == GLFW_KEY_RIGHT) {
         if(action == GLFW_PRESS) {
             numKeys++;
-            playerRotation += 270.0f;
             playerMovementDirection.x = 1;
         } else if(action == GLFW_RELEASE) {
             playerMovementDirection.x = 0;
@@ -87,20 +57,16 @@ void key_callback(int key, int action) {
     }
 
     if(numKeys > 0) {
-        //playerRotation = playerMovementDirection.x * -90.0f;
-        if(playerMovementDirection.x == -1) playerRotation = 90.0f;
-        if(playerMovementDirection.x == 1)  playerRotation = 270.0f;
-        if(playerMovementDirection.z == 1)  playerRotation = 180.0f;
-        if(playerMovementDirection.z == -1) playerRotation = 0.0f;
-/*
-        if(playerMovementDirection.z > 0) {
-            playerRotation += 180.0f;
-            if(playerMovementDirection.x > 0) {
-                playerRotation -= 325.0f;
-            }
+        glm::vec2 p = glm::vec2(playerMovementDirection.x, playerMovementDirection.z);
+        float angle = 0.0f;
+        if(p.y == 0) {
+            angle = -90.0f * p.x;
+        } else if(p.y < 0) {
+            angle = (float) atan((double)p.x / p.y) * 180.0f / M_PI;
+        } else {
+            angle = (float) atan((double)p.x / p.y) * 180.0f / M_PI - 180.0f;
         }
-        playerRotation = playerRotation / numKeys;
-        */
+        playerRotation = angle;
     }
 
     if(playerMovementDirection != glm::vec3(0)) {
@@ -186,6 +152,8 @@ int main(int argc, const char *argv[]) {
     double deltaTime = lastTime;
     double runTime = 0;
     double restTime = 0;
+    int playerSide = 0;
+    float sideChangeTime;
 	while(!glfwWindowShouldClose(window.window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
@@ -198,14 +166,37 @@ int main(int argc, const char *argv[]) {
         deltaTime = glfwGetTime() - lastTime;
         lastTime = glfwGetTime();
 
-        player.rotate(playerRotation);
-        if(playerMovementDirection != glm::vec3(0)) {
-            player.move(glm::normalize(playerMovementDirection));
-            camera.move((float)deltaTime * 3.0f * glm::normalize(playerMovementDirection));
-        } else {
-            player.move(glm::vec3(0));
+        if(player.isControllable()) {
+            player.rotate(playerRotation, glm::vec3(0,1,0), 0.15f);
+
+            if(playerMovementDirection != glm::vec3(0)) {
+                player.move(glm::normalize(playerMovementDirection));
+                camera.move((float)deltaTime * 3.0f * glm::normalize(playerMovementDirection));
+            } else {
+                player.move(glm::vec3(0));
+            }
         }
+
         player.update(deltaTime);
+
+        sideChangeTime += deltaTime;
+
+        if(playerSide == 0 && player.getPosition().x > 5) {
+            std::cout << "ABOVE" << std::endl;
+            playerSide = 1;
+            player.setControllable(false);
+            player.stop();
+            sideChangeTime = 0.0f;
+
+            player.rotate(-90.0f, glm::vec3(0,0,1), 0.3f);
+            player.up = glm::vec3(1,0,0);
+            playerSide = 2;
+        }
+
+
+        if(sideChangeTime > 0.3f) {
+            player.setControllable(true);
+        }
 
         camera.lookAt(player.getPosition());
         camera.update();

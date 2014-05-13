@@ -64,6 +64,7 @@ class Mesh {
         void boneTransform(std::string animName, float timeInSeconds, std::vector<glm::mat4>& transforms);
         bool initMaterials(const aiScene* pScene, const string& fileName);
         void render(ShaderProgram &shaderProgram, Camera &camera, Environment &env, glm::vec3 position, glm::vec3 up, glm::quat rotation);
+        void render(ShaderProgram &shaderProgram, Camera &camera, Environment &env);
         void addAnimation(Animation animation);
     private:
         uint numBones = 0;

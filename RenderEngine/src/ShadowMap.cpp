@@ -18,6 +18,8 @@ ShadowMap::ShadowMap(ShaderProgram &program) : shaderProgram(program) {
     if(glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
         std::cout << "Failed to set up shadow map framebuffer." << std::endl;
     }
+
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
 void ShadowMap::begin() {

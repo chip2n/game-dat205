@@ -3,6 +3,7 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+#include <sstream>
 #include "Mesh.h"
 
 bool Mesh::loadMesh(const string& fileName) {
@@ -130,7 +131,6 @@ bool Mesh::initMaterials(const aiScene* pScene, const string& fileName) {
             aiString path;
 
             if(pMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) {
-            std::cout << "RFDG" << std::endl;
                 string p(path.data);
 
                 if(p.substr(0,2) == ".\\") {
@@ -462,8 +462,47 @@ void Mesh::render(ShaderProgram &shaderProgram, Camera &camera, Environment &env
     modelM = glm::translate(modelM, position);
     modelM = modelM * glm::toMat4(rotation);
     shaderProgram.setUniform("modelMatrix", modelM);
-    shaderProgram.setUniform("lightPos", env.getLights()[0].getPosition());
+    for(uint i = 0; i < env.getLights().size(); i++) {
+        std::stringstream sstm;
+        sstm << "lightPos[" << i << "]";
+        shaderProgram.setUniform(sstm.str().c_str(), env.getLights()[i].getPosition());
+    }
 
+
+    glBindVertexArray(vao);
+
+    for(uint i = 0; i < meshEntries.size(); i++) {
+        const uint materialIndex = meshEntries[i].materialIndex;
+        assert(materialIndex < textures.size());
+
+        if(textures[materialIndex]) {
+            textures[materialIndex]->bind();
+        }
+        
+        glDrawElementsBaseVertex(GL_TRIANGLES,
+                                 meshEntries[i].numIndices,
+                                 GL_UNSIGNED_INT,
+                                 (void*)(sizeof(uint) * meshEntries[i].baseIndex),
+                                 meshEntries[i].baseVertex);
+    }
+
+    glBindVertexArray(0);
+
+    shaderProgram.end();
+}
+
+void Mesh::render(ShaderProgram &shaderProgram, Camera &camera, Environment &env) {
+    shaderProgram.begin();
+    shaderProgram.setUniform("modelViewProjectionMatrix", camera.getCombinedMatrix());
+
+    glm::mat4 modelM;
+    shaderProgram.setUniform("modelMatrix", modelM);
+    //shaderProgram.setUniform("lightPos", env.getLights()[0].getPosition());
+    for(uint i = 0; i < env.getLights().size(); i++) {
+        std::stringstream sstm;
+        sstm << "lightPos[" << i << "]";
+        shaderProgram.setUniform(sstm.str().c_str(), env.getLights()[i].getPosition());
+    }
 
     glBindVertexArray(vao);
 

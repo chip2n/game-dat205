@@ -154,6 +154,7 @@ int main(int argc, const char *argv[]) {
     double restTime = 0;
     int playerSide = 0;
     float sideChangeTime;
+    glm::vec3 currentCubeNormal = glm::vec3(0,1,0);
 	while(!glfwWindowShouldClose(window.window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glEnable(GL_DEPTH_TEST);
@@ -166,8 +167,22 @@ int main(int argc, const char *argv[]) {
         deltaTime = glfwGetTime() - lastTime;
         lastTime = glfwGetTime();
 
+        if(playerSide == 0 && player.getPosition().x > 5) {
+            currentCubeNormal = glm::vec3(1,0,0);
+            std::cout << "ABOVE" << std::endl;
+            playerSide = 1;
+            player.setControllable(false);
+            player.stop();
+            sideChangeTime = 0.0f;
+
+            player.rotate(-90.0f, glm::vec3(0,0,1), 0.3f);
+            playerSide = 2;
+            player.up = currentCubeNormal;
+        }
+
         if(player.isControllable()) {
-            player.rotate(playerRotation, glm::vec3(0,1,0), 0.15f);
+            std::cout << "DERP" << std::endl;
+            player.rotate(playerRotation, currentCubeNormal, 0.15f);
 
             if(playerMovementDirection != glm::vec3(0)) {
                 player.move(glm::normalize(playerMovementDirection));
@@ -180,19 +195,6 @@ int main(int argc, const char *argv[]) {
         player.update(deltaTime);
 
         sideChangeTime += deltaTime;
-
-        if(playerSide == 0 && player.getPosition().x > 5) {
-            std::cout << "ABOVE" << std::endl;
-            playerSide = 1;
-            player.setControllable(false);
-            player.stop();
-            sideChangeTime = 0.0f;
-
-            player.rotate(-90.0f, glm::vec3(0,0,1), 0.3f);
-            player.up = glm::vec3(1,0,0);
-            playerSide = 2;
-        }
-
 
         if(sideChangeTime > 0.3f) {
             player.setControllable(true);
@@ -221,7 +223,7 @@ int main(int argc, const char *argv[]) {
             shaderProgram.setUniform(sstm.str().c_str(), transforms[i]);
         }
 
-        monkey.render(shaderProgram, camera, env, player.getPosition(), glm::vec3(0,1,0), player.currentRotation);
+        monkey.render(shaderProgram, camera, env, player.getPosition(), player.up, player.currentRotation);
         shaderProgram.end();
 
 

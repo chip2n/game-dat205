@@ -2,9 +2,13 @@
 #include "Player.h"
 #include <sstream>
 #include <cmath>
+#include "rapidjson/document.h"
+#include "Level.h"
+#include "ResourceManager.h"
 
 Camera camera(45.0f, 640, 480);
 Player player;
+ResourceManager resourceManager;
 
 glm::vec3 movementDirection;
 glm::vec3 playerMovementDirection;
@@ -14,19 +18,13 @@ int numKeys = 0;
 int width;
 int height;
 void key_callback(int key, int action) {
-    /*
-	if(key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-		glfwSetWindowShouldClose(window, GL_TRUE);
-        */
-
-    float oldRotation = playerRotation;
-    glm::vec2 oldP = glm::vec2(playerMovementDirection.x, playerMovementDirection.z);
     if(key == GLFW_KEY_UP) {
         if(action == GLFW_PRESS) {
             numKeys++;
             playerMovementDirection.z = -1;
         } else if(action == GLFW_RELEASE) {
-            playerMovementDirection.z = 0;
+            if(playerMovementDirection.z != 1)
+                playerMovementDirection.z = 0;
             numKeys--;
         }
     }
@@ -35,7 +33,8 @@ void key_callback(int key, int action) {
             numKeys++;
             playerMovementDirection.z = 1;
         } else if(action == GLFW_RELEASE) {
-            playerMovementDirection.z = 0;
+            if(playerMovementDirection.z != -1)
+                playerMovementDirection.z = 0;
             numKeys--;
         }
     }
@@ -44,7 +43,8 @@ void key_callback(int key, int action) {
             numKeys++;
             playerMovementDirection.x = -1;
         } else if(action == GLFW_RELEASE) {
-            playerMovementDirection.x = 0;
+            if(playerMovementDirection.x != 1)
+                playerMovementDirection.x = 0;
             numKeys--;
         }
     }
@@ -53,7 +53,8 @@ void key_callback(int key, int action) {
             numKeys++;
             playerMovementDirection.x = 1;
         } else if(action == GLFW_RELEASE) {
-            playerMovementDirection.x = 0;
+            if(playerMovementDirection.x != -1)
+                playerMovementDirection.x = 0;
             numKeys--;
         }
     }
@@ -79,13 +80,6 @@ void key_callback(int key, int action) {
 
 double lastX, lastY;
 static void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
-    double deltaX = xpos - lastX;
-    double deltaY = ypos - lastY;
-
-    //camera.rotate(glm::vec3(0,1,0), -deltaX/10);
-    //camera.rotate(camera.getRight(), -deltaY/10);
-    //camera.update();
-
     lastX = xpos;
     lastY = ypos;
 }
@@ -140,7 +134,7 @@ bool pointInsideTriangle(glm::vec3 p, glm::vec3 p0, glm::vec3 p1, glm::vec3 p2) 
 }
 
 bool pointInsideMaze(Model &maze, glm::vec3 point) {
-    for(int i = 0; i < maze.positions.size(); i+=3) {
+    for(unsigned int i = 0; i < maze.positions.size(); i+=3) {
         glm::vec3 p1 = maze.positions[i];
         glm::vec3 p2 = maze.positions[i+1];
         glm::vec3 p3 = maze.positions[i+2];
@@ -176,8 +170,12 @@ int main(int argc, const char *argv[]) {
     camera.setPosition(glm::vec3(0,5,4));
     camera.update();
 
-    Mesh levelM;
-    levelM.loadMesh("assets/unfinished/maze.obj");
+    //Level l;
+    //l.loadLevel("assets/data/levels/maze.json");
+    Level *l = resourceManager.loadLevel("assets/data/levels/maze.json");
+    l = resourceManager.loadLevel("assets/data/levels/maze.json");
+    //Level l = resourceManager.levels["assets/data/levels/maze.json"];
+
 
     Mesh monkey;
     monkey.loadMesh("assets/unfinished/skull.dae");
@@ -207,8 +205,6 @@ int main(int argc, const char *argv[]) {
     double deltaTime = lastTime;
     double runTime = 0;
     double restTime = 0;
-    int playerSide = 0;
-    float sideChangeTime;
     glm::vec3 currentCubeNormal = glm::vec3(0,1,0);
 	while(!glfwWindowShouldClose(window.window)) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -243,15 +239,6 @@ int main(int argc, const char *argv[]) {
         camera.lookAt(player.getPosition());
         camera.update();
 
-
-        /*
-        shadowMap.begin();
-        shadowMap.render(levelInstance);
-        shadowMap.render(levelCollisionInstance);
-        shadowMap.end();
-        glViewport(0, 0, width, height);
-        */
-
         std::vector<glm::mat4> transforms;
         transforms.resize(4);
         shaderProgram.begin();
@@ -275,8 +262,12 @@ int main(int argc, const char *argv[]) {
         monkey.render(shaderProgram, camera, env, player.getPosition(), player.up, player.currentRotation);
         shaderProgram.end();
 
-        levelM.render(staticShader, camera, env);
-        coin.render(staticShader, camera, env);
+        l->levelMesh->render(staticShader, camera, env);
+        //coin.render(staticShader, camera, env);
+
+        for(unsigned int i = 0; i < l->gameObjects.size(); i++) {
+            l->gameObjects[i].mesh->render(staticShader, camera, env, l->gameObjects[i].getPosition());
+        }
 
 		glfwSwapBuffers(window.window);
 		glfwPollEvents();

@@ -1,4 +1,7 @@
+#include <iostream>
+#include <fstream>
 #include "GameObject.h"
+#include "rapidjson/document.h"
 
 void GameObject::setPosition(glm::vec3 pos) {
     position = pos;

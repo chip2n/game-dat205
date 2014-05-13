@@ -1,0 +1,7 @@
+{
+    "id": "coin",
+    "mesh": "assets/unfinished/coin.obj",
+    "collectable": true,
+    "collectAnimation": "collect",
+    "passable": true
+}

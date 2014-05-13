@@ -22,6 +22,8 @@ set(GAME_SRCS
     ${PROJECT_SOURCE_DIR}/Player.cpp
     ${PROJECT_SOURCE_DIR}/GameObject.cpp
     ${PROJECT_SOURCE_DIR}/DynamicGameObject.cpp
+    ${PROJECT_SOURCE_DIR}/Level.cpp
+    ${PROJECT_SOURCE_DIR}/ResourceManager.cpp
 )
 
 add_executable(${PROJECT_NAME} ${GAME_SRCS})

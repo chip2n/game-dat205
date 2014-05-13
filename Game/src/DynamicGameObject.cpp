@@ -14,14 +14,8 @@ void DynamicGameObject::rotate(float angle, glm::vec3 axis, float duration) {
         rotationDuration = duration;
         rotationFinished = false;
         oldRotation = currentRotation;
-        float oldAngle = glm::angle(oldRotation);
-        //oldRotAxis = rotAxis;
         goalRotation = glm::angleAxis(angle, axis);
         rotStartTime = 0;
-        //rotAxis = axis;
-        //std::cout << "Rotation from " << glm::angle(oldRotation) << " to " << glm::angle(goalRotation) << std::endl;
-
-
     }
 }
 
@@ -31,7 +25,7 @@ void DynamicGameObject::update(float deltaTime) {
 
     float factor = abs(glm::angle(goalRotation) - glm::angle(oldRotation)) / 90.0f;
 
-    factor = factor == 0.0f ? factor = 1.0f : factor;
+    if(factor == 0.0f) factor = 1.0f;
 
     // Check if the rotation will take the long path - if so, negate goal rotation
     // to avoid this.

@@ -1,0 +1,28 @@
+{
+    "level": {
+        "mesh": "assets/unfinished/maze.obj",
+        "playerStart": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+        }
+    },
+    "objects": [
+        {
+            "id": "coin",
+            "pos": {
+                "x": 2,
+                "y": 0,
+                "z": 0
+            }
+        },
+        {
+            "id": "coin",
+            "pos": {
+                "x": 3,
+                "y": 0,
+                "z": 0
+            }
+        }
+    ]
+}

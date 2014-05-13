@@ -138,7 +138,7 @@ int main(int argc, const char *argv[]) {
     env.addLight(light);
 
     Model level;
-    level.loadFromFile("assets/unfinished/cube.obj");
+    level.loadFromFile("assets/unfinished/maze.obj");
     ModelInstance levelInstance(&level);
     levelInstance.move(glm::vec3(0,-5,0));
 

@@ -216,6 +216,7 @@ int main(int argc, const char *argv[]) {
         std::cout << "YO" << std::endl;
         env.addLight(l->getLights()[i]);
     }
+    env.addLight(Light(glm::vec3(1,1,0)));
 
     Model levelCollision;
     levelCollision.loadFromFile("assets/unfinished/maze_col.obj");

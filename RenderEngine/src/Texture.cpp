@@ -27,7 +27,7 @@ void Texture::loadFromFile(std::string path) {
     */
 
     if(0 == texId) {
-        std::cout << "Error loading texture." << std::endl;
+        std::cout << "Error loading texture: " << path << std::endl;
     }
 }
 

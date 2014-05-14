@@ -1,6 +1,6 @@
 {
     "level": {
-        "mesh": "assets/unfinished/maze.dae",
+        "mesh": "assets/unfinished/maze.obj",
         "playerStart": {
             "x": 0,
             "y": 0,
@@ -9,16 +9,16 @@
     },
     "lights": [
         {
-            "position": { "x": 7.73912, "y": 1.25905, "z": -1.63997 }
+            "position": { "x": 7.73912, "y": 1.25905, "z": -1.0}
         },
         {
-            "position": { "x": 4.68014, "y": 1.25905, "z": -1.63997 }
+            "position": { "x": 4.68014, "y": 1.25905, "z": -1.0 }
         },
         {
-            "position": { "x": 1.59290, "y": 1.25905, "z": -1.63997 }
+            "position": { "x": 1.59290, "y": 1.25905, "z": -1.0 }
         },
         {
-            "position": { "x": -1.47161, "y": 1.25905, "z": -1.63997 }
+            "position": { "x": -1.47161, "y": 1.25905, "z": -1.0 }
         }
     ],
     "objects": [

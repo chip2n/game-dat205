@@ -13,10 +13,10 @@ bool Model::loadFromFile(std::string path) {
             aiProcess_LimitBoneWeights);
 
     if(!scene) {
-        std::cout << "WFEGFD" << std::endl;
         return false;
     }
 
+    /*
     std::cout << "Loaded model " << path << std::endl;
     std::cout << "-- Number of meshes: " << scene->mNumMeshes << std::endl;
     std::cout << "-- Number of animations: " << scene->mNumAnimations << std::endl;
@@ -24,6 +24,7 @@ bool Model::loadFromFile(std::string path) {
     std::cout << "-- Number of lights: " << scene->mNumLights << std::endl;
     std::cout << "-- Number of materials: " << scene->mNumMaterials << std::endl;
     std::cout << "-- Number of textures: " << scene->mNumTextures << std::endl;
+    */
 
 
     setupBuffers();

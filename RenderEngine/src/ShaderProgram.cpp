@@ -61,7 +61,6 @@ GLuint ShaderProgram::linkProgram(GLuint vertShader, GLuint fragShader) {
     GLint compileResult = GL_FALSE;
     int infoLogLength;
 
-    printf("Linking program\n");
     GLuint program = glCreateProgram();
     glAttachShader(program, vertShader);
     glAttachShader(program, fragShader);

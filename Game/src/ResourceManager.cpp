@@ -47,6 +47,13 @@ Level* ResourceManager::loadLevel(std::string path) {
             level.gameObjects.push_back(gameObject);
         }
 
+        const rapidjson::Value& l = d["lights"];
+        assert(objects.IsArray());
+        for(rapidjson::SizeType i = 0; i < l.Size(); i++) {
+            glm::vec3 position = glm::vec3(l[i]["position"]["x"].GetDouble(), l[i]["position"]["y"].GetDouble(), l[i]["position"]["z"].GetDouble());
+            level.lights.push_back(Light(position));
+        }
+
         levels.insert(std::pair<std::string, Level>(path, level));
 
         return &levels[path];

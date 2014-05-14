@@ -6,6 +6,8 @@
 #include "Level.h"
 #include "ResourceManager.h"
 
+#define PICKUP_RADIUS 0.3
+
 Camera camera(45.0f, 640, 480);
 Player player;
 ResourceManager resourceManager;
@@ -148,6 +150,29 @@ bool pointInsideMaze(Model &maze, glm::vec3 point) {
     return false;
 }
 
+bool isCollision(Model &levelCollision, Player &player) {
+    if(!pointInsideMaze(levelCollision, player.getPosition())) {
+        return true;
+    }
+    return false;
+}
+
+int coins = 0;
+void handleItemCollisions(std::vector<GameObject> &objects, Player &player) {
+    std::vector<GameObject>::iterator iter;
+    for(iter = objects.begin(); iter != objects.end(); ) {
+        float distance = glm::length(iter->getPosition() - player.getPosition());
+        if(distance < PICKUP_RADIUS) {
+            std::cout << "Picked up a coin" << std::endl;
+            coins++;
+            std::cout << "You now have " << coins << " coins." << std::endl;
+            iter = objects.erase(iter);
+        } else {
+            iter++;
+        }
+    }
+}
+
 int main(int argc, const char *argv[]) {
      Window window;
 
@@ -187,10 +212,10 @@ int main(int argc, const char *argv[]) {
     Texture texture("assets/textures/bricks.png");
 
     Environment env;
-    Light light(glm::vec3(0, 0, 0));
-    Light light2(glm::vec3(2, 0, 0));
-    env.addLight(light);
-    env.addLight(light2);
+    for(unsigned int i = 0; i < l->getLights().size(); i++) {
+        std::cout << "YO" << std::endl;
+        env.addLight(l->getLights()[i]);
+    }
 
     Model levelCollision;
     levelCollision.loadFromFile("assets/unfinished/maze_col.obj");
@@ -225,16 +250,18 @@ int main(int argc, const char *argv[]) {
                 glm::vec3 oldPosition = player.getPosition();
                 player.move(glm::normalize(playerMovementDirection));
                 player.update(deltaTime);
-                if(!pointInsideMaze(levelCollision, player.getPosition())) {
+                if(isCollision(levelCollision, player)) {
                     player.setPosition(oldPosition);
                     player.move(glm::vec3(0));
                 } else {
-                camera.move((float)deltaTime * 3.0f * glm::normalize(playerMovementDirection));
+                camera.move((float)deltaTime * 2.5f * glm::normalize(playerMovementDirection));
                 }
             } else {
                 player.move(glm::vec3(0));
             }
         }
+
+        handleItemCollisions(l->gameObjects, player);
 
         camera.lookAt(player.getPosition());
         camera.update();

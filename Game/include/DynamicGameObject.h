@@ -15,7 +15,7 @@ class DynamicGameObject : public GameObject {
         glm::vec3 rotAxis = glm::vec3(0,1,0);
         glm::vec3 oldRotAxis = glm::vec3(0,1,0);
         float turnSpeed = 5.0f;
-        float speed = 3.0f;
+        float speed = 2.5f;
         glm::quat oldRotation;
         glm::quat currentRotation;
         glm::quat goalRotation;

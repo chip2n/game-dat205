@@ -78,6 +78,10 @@ bool Mesh::initFromScene(const aiScene* scene, const string& fileName) {
     if(!initMaterials(scene, fileName)) {
         return false;
     }
+
+    if(!initLights(scene, fileName)) {
+        return false;
+    }
     
     glBindBuffer(GL_ARRAY_BUFFER, buffers[POS_VBO]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(positions[0])* positions.size(), &positions[0], GL_STATIC_DRAW);
@@ -139,7 +143,6 @@ bool Mesh::initMaterials(const aiScene* pScene, const string& fileName) {
 
                 string fullPath = dir + "/" + p;
 
-                std::cout << "Loading texture: " << fullPath << std::endl;
                 textures[i] = new Texture(fullPath);
 
                 /*
@@ -159,6 +162,17 @@ bool Mesh::initMaterials(const aiScene* pScene, const string& fileName) {
     return ret;
 }
 
+bool Mesh::initLights(const aiScene* pScene, const string& fileName) {
+    std::cout << "Number of lights: " << pScene->mNumLights << std::endl;
+    for(unsigned int i = 0; i < pScene->mNumLights; i++) {
+        aiVector3D position = pScene->mLights[i]->mPosition;
+        std::cout << pScene->mLights[i]->mName.C_Str() << ": (" << position.x << "," << position.y << "," << position.z << ")" << std::endl;
+        Light light(glm::vec3(position.x, position.y, position.z));
+        lights.push_back(light);
+    }
+    return true;
+}
+
 void Mesh::initMesh(uint meshIndex,
                     const aiMesh* paiMesh,
                     vector<glm::vec3>& positions,
@@ -168,7 +182,6 @@ void Mesh::initMesh(uint meshIndex,
                     vector<uint>& indices)
 {
     const aiVector3D zero3D(0.0f, 0.0f, 0.0f);
-    std::cout << "Mesh vertices: " << paiMesh->mNumVertices << std::endl;
 
     for(uint i = 0; i < paiMesh->mNumVertices; i++) {
         const aiVector3D* pPos      = &(paiMesh->mVertices[i]);
@@ -193,9 +206,6 @@ void Mesh::initMesh(uint meshIndex,
 }
 
 void Mesh::loadBones(uint meshIndex, const aiMesh* pMesh, vector<VertexBoneData>& bones) {
-    std::cout << "-------------------------" << std::endl;
-    std::cout << "Loading bones (" << pMesh->mNumBones << ")" << std::endl;
-
     for(uint i = 0; i < pMesh->mNumBones; i++) {
         uint boneIndex = 0;
         std::string boneName(pMesh->mBones[i]->mName.data);
@@ -250,7 +260,6 @@ void Mesh::boneTransform(std::string animName, float timeInSeconds, std::vector<
             float secondsPerFrame = totalDuration / anim.totalFrames;
             float startTime = anim.startFrame * secondsPerFrame;
             float endTime = anim.endFrame * secondsPerFrame;
-            float duration = anim.endFrame * secondsPerFrame - startTime;
 
             float animationTime = fmod(timeInTicks, totalDuration - (totalDuration - endTime) - startTime);
             animationTime += startTime;
@@ -563,6 +572,5 @@ void Mesh::render(ShaderProgram &shaderProgram, Camera &camera, Environment &env
 
 
 void Mesh::addAnimation(Animation animation) {
-    std::cout << "Adding animation: " << animation.name << std::endl;
     animationMap[animation.name] = animation;
 }

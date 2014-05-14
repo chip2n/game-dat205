@@ -14,6 +14,7 @@
 #include "ShaderProgram.h"
 #include "Camera.h"
 #include "Environment.h"
+#include "Light.h"
 
 #define NUM_BONES_PER_VERTEX 4
 #define NUM_VBOS 5
@@ -61,8 +62,10 @@ class Mesh {
         std::map<std::string, Animation> animationMap;
         std::vector<BoneInfo> boneInfo;
         std::vector<MeshEntry> meshEntries;
+        std::vector<Light> lights;
         void boneTransform(std::string animName, float timeInSeconds, std::vector<glm::mat4>& transforms);
         bool initMaterials(const aiScene* pScene, const string& fileName);
+        bool initLights(const aiScene* pScene, const string& fileName);
         void render(ShaderProgram &shaderProgram, Camera &camera, Environment &env, glm::vec3 position, glm::vec3 up, glm::quat rotation);
         void render(ShaderProgram &shaderProgram, Camera &camera, Environment &env);
         void render(ShaderProgram &shaderProgram, Camera &camera, Environment &env, glm::vec3 position);

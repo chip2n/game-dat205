@@ -1,6 +1,8 @@
 #include <iostream>
 #include "ShadowMap.h"
 
+// http://www.altdevblogaday.com/2011/01/30/omni-directional-shadow-mapping/
+
 ShadowMap::ShadowMap(ShaderProgram &program) : shaderProgram(program) {
     glGenFramebuffers(1, &shadowFramebuffer);
     glBindFramebuffer(GL_FRAMEBUFFER, shadowFramebuffer);

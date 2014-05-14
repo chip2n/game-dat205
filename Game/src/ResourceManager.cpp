@@ -34,8 +34,10 @@ Level* ResourceManager::loadLevel(std::string path) {
         rapidjson::Document d;
         d.Parse<0>(json.c_str());
 
+        // Loading level mesh
         level.levelMesh = loadMesh(d["level"]["mesh"].GetString());
 
+        // Loading game objects
         const rapidjson::Value& objects = d["objects"];
         assert(objects.IsArray());
         for(rapidjson::SizeType i = 0; i < objects.Size(); i++) {
@@ -47,11 +49,14 @@ Level* ResourceManager::loadLevel(std::string path) {
             level.gameObjects.push_back(gameObject);
         }
 
+        // Loading lights
         const rapidjson::Value& l = d["lights"];
         assert(objects.IsArray());
         for(rapidjson::SizeType i = 0; i < l.Size(); i++) {
             glm::vec3 position = glm::vec3(l[i]["position"]["x"].GetDouble(), l[i]["position"]["y"].GetDouble(), l[i]["position"]["z"].GetDouble());
-            level.lights.push_back(Light(position));
+            Light light(position);
+            light.intensity = l[i]["intensity"].GetDouble();
+            level.lights.push_back(light);
         }
 
         levels.insert(std::pair<std::string, Level>(path, level));

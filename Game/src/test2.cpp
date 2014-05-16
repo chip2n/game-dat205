@@ -241,6 +241,8 @@ int main(int argc, const char *argv[]) {
         glEnable(GL_BLEND);
         glCullFace(GL_BACK);
 
+        std::cout << "Player z: " << player.getPosition().z << std::endl;
+
         deltaTime = glfwGetTime() - lastTime;
         lastTime = glfwGetTime();
 

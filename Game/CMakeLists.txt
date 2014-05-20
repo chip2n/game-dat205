@@ -18,7 +18,7 @@ include_directories(${CMAKE_SOURCE_DIR}/RenderEngine/include)
 set(RENDERENGINE "RenderEngine")
 
 set(GAME_SRCS 
-    ${PROJECT_SOURCE_DIR}/test2.cpp
+    ${PROJECT_SOURCE_DIR}/Main.cpp
     ${PROJECT_SOURCE_DIR}/Player.cpp
     ${PROJECT_SOURCE_DIR}/GameObject.cpp
     ${PROJECT_SOURCE_DIR}/DynamicGameObject.cpp

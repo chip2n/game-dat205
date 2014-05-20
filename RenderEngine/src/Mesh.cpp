@@ -101,6 +101,7 @@ bool Mesh::initFromScene(const aiScene* scene, const string& fileName) {
     glBindBuffer(GL_ARRAY_BUFFER, buffers[BONE_VBO]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(bones[0]) * bones.size(), &bones[0], GL_STATIC_DRAW);
     glEnableVertexAttribArray(BONE_ID_LOCATION);
+    std::cout << "YOLO" << std::endl;
     glVertexAttribIPointer(BONE_ID_LOCATION, 4, GL_INT, sizeof(VertexBoneData), (const GLvoid*)0);
     glEnableVertexAttribArray(BONE_WEIGHT_LOCATION);
     glVertexAttribPointer(BONE_WEIGHT_LOCATION, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)16);

@@ -199,8 +199,17 @@ glm::vec2 calculateIntersection(glm::vec2 p, glm::vec2 r, glm::vec2 q, glm::vec2
     return glm::vec2(0);
 }
 
-glm::vec3 getEdgeCollision(Model &levelCollision, glm::vec3 oldPosition3D, glm::vec3 newPosition3D) {
-    assert(pointInsideMaze(levelCollision, oldPosition3D) == glm::vec3(0));
+struct CollisionData {
+    bool collision = false;
+    glm::vec3 wallNormal;
+    glm::vec3 oldPosition;
+    glm::vec3 newPosition;
+};
+
+ CollisionData getEdgeCollision(Model &levelCollision, glm::vec3 oldPosition3D, glm::vec3 newPosition3D) {
+    //assert(pointInsideMaze(levelCollision, oldPosition3D) == glm::vec3(0));
+
+
 
     glm::vec2 oldPosition = glm::vec2(oldPosition3D.x, oldPosition3D.z);
     glm::vec2 newPosition = glm::vec2(newPosition3D.x, newPosition3D.z);
@@ -210,6 +219,7 @@ glm::vec3 getEdgeCollision(Model &levelCollision, glm::vec3 oldPosition3D, glm::
     std::vector<glm::vec3> oldTriangle = getTriangle(levelCollision, oldPosition3D);
     std::vector<glm::vec3> newTriangle = getTriangle(levelCollision, newPosition3D);
 
+    CollisionData data;
     if(oldTriangle.size() == 3 && newTriangle.size() == 0) {
       glm::vec2 p1 = glm::vec2(oldTriangle[0].x, oldTriangle[0].z);
       glm::vec2 p2 = glm::vec2(oldTriangle[1].x, oldTriangle[1].z);
@@ -218,48 +228,88 @@ glm::vec3 getEdgeCollision(Model &levelCollision, glm::vec3 oldPosition3D, glm::
       glm::vec2 i1 = calculateIntersection(p1, p2-p1, oldPosition, moveDirection);
       glm::vec2 i2 = calculateIntersection(p2, p3-p2, oldPosition, moveDirection);
       glm::vec2 i3 = calculateIntersection(p3, p1-p3, oldPosition, moveDirection);
+
       std::cout << "---------" << std::endl;
+      std::cout << "Old position: ";
+      printVec3(oldPosition3D);
+      std::cout << "New position: ";
+      printVec3(newPosition3D);
 
       if(i1 != glm::vec2(0)) {
-          std::cout << "Intersection point: ";
+          std::cout << "Intersection point1: ";
           printVec2(i1);
           // find edge normal
-          glm::vec2 normal = glm::vec2(i1.y, -i1.x);
-          glm::vec2 o = p3 - p1;
-          if(glm::dot(normal, o) < 0 ) {
-              normal = -normal;
+          glm::vec2 normal = glm::normalize(glm::vec2(p2.y - p1.y, p1.x - p2.x));
+
+          data.collision = true;
+          data.wallNormal = glm::vec3(normal.x, 0, normal.y);
+          data.oldPosition = oldPosition3D;
+          data.newPosition = glm::vec3(i1.x, oldPosition3D.y, i1.y);
+          data.newPosition = oldPosition3D;
+          if(moveDirection.x != 0) {
+              if(pointInsideMaze(levelCollision, data.newPosition + glm::vec3(moveDirection.x,0,0)) == glm::vec3(0)) {
+                data.newPosition += glm::vec3(moveDirection.x,0,0);
+              }
           }
-          return glm::vec3(normal.x, 0, normal.y);
+          if(moveDirection.y != 0) {
+              if(pointInsideMaze(levelCollision, data.newPosition + glm::vec3(0,0,moveDirection.y)) == glm::vec3(0)) {
+                data.newPosition += glm::vec3(0,0,moveDirection.y);
+              }
+          }
+          return data;
       }
       if(i2 != glm::vec2(0)) {
-          std::cout << "Intersection point: ";
+          std::cout << "Intersection point2: ";
           printVec2(i2);
           // find edge normal
-          glm::vec2 normal = glm::vec2(i1.y, -i1.x);
-          glm::vec2 o = p1 - p2;
-          if(glm::dot(normal, o) < 0 ) {
-              normal = -normal;
+          glm::vec2 normal = glm::normalize(glm::vec2(p3.y - p2.y, p2.x - p3.x));
+
+          CollisionData data;
+          data.collision = true;
+          data.wallNormal = glm::vec3(normal.x, 0, normal.y);
+          data.oldPosition = oldPosition3D;
+          data.newPosition = glm::vec3(i2.x, oldPosition3D.y, i2.y);
+          data.newPosition = oldPosition3D;
+          if(moveDirection.x != 0) {
+              if(pointInsideMaze(levelCollision, data.newPosition + glm::vec3(moveDirection.x,0,0)) == glm::vec3(0)) {
+                data.newPosition += glm::vec3(moveDirection.x,0,0);
+              }
           }
-          return glm::vec3(normal.x, 0, normal.y);
+          if(moveDirection.y != 0) {
+              if(pointInsideMaze(levelCollision, data.newPosition + glm::vec3(0,0,moveDirection.y)) == glm::vec3(0)) {
+                data.newPosition += glm::vec3(0,0,moveDirection.y);
+              }
+          }
+          return data;
       }
       if(i3 != glm::vec2(0)) {
-          std::cout << "Intersection point: ";
+          std::cout << "Intersection point3: ";
           printVec2(i3);
           // find edge normal
-          glm::vec2 normal = glm::vec2(i1.y, -i1.x);
-          glm::vec2 o = p2 - p3;
-          if(glm::dot(normal, o) < 0 ) {
-              normal = -normal;
+          glm::vec2 normal = glm::normalize(glm::vec2(p1.y - p3.y, p3.x - p1.x));
+
+          CollisionData data;
+          data.collision = true;
+          data.wallNormal = glm::vec3(normal.x, 0, normal.y);
+          data.oldPosition = oldPosition3D;
+          data.newPosition = glm::vec3(i3.x, oldPosition3D.y, i3.y);
+          data.newPosition = oldPosition3D;
+          if(moveDirection.x != 0) {
+              if(pointInsideMaze(levelCollision, data.newPosition + glm::vec3(moveDirection.x,0,0)) == glm::vec3(0)) {
+                data.newPosition += glm::vec3(moveDirection.x,0,0);
+              }
           }
-          return glm::vec3(normal.x, 0, normal.y);
+          if(moveDirection.y != 0) {
+              if(pointInsideMaze(levelCollision, data.newPosition + glm::vec3(0,0,moveDirection.y)) == glm::vec3(0)) {
+                data.newPosition += glm::vec3(0,0,moveDirection.y);
+              }
+          }
+          return data;
       }
     }
-
-    return glm::vec3(0,0,0);
+    std::cout << "OMG NO COLLISION" << std::endl;
+    return data;
 }
-
-
-
 
 void handlePlayerMovement(float deltaTime, Model &levelCollision) {
     if(player.isControllable()) {
@@ -267,31 +317,31 @@ void handlePlayerMovement(float deltaTime, Model &levelCollision) {
 
         if(playerMovementDirection != glm::vec3(0)) {
             glm::vec3 oldPosition = player.getPosition();
-            glm::vec3 n = getEdgeCollision(levelCollision, oldPosition, oldPosition + playerMovementDirection * 2.5f * deltaTime);
-            std::cout << "normal: (" << n.x << "," << n.y << "," << n.z << ")" << std::endl;
-            player.move(glm::normalize(playerMovementDirection));
-            player.update(deltaTime);
-            if(isCollision(levelCollision, player) != glm::vec3(0)) {
-                player.setPosition(oldPosition);
+            CollisionData n = getEdgeCollision(levelCollision, oldPosition, oldPosition + playerMovementDirection * 2.5f * deltaTime);
+            if(n.collision) {
+                player.setPosition(n.newPosition);
+                glm::vec3 cm = n.newPosition - oldPosition;
+                camera.move(cm);
                 player.move(glm::vec3(0));
             } else {
-            camera.move((float)deltaTime * 2.5f * glm::normalize(playerMovementDirection));
+                player.move(glm::normalize(playerMovementDirection));
+                camera.move((float)deltaTime * 2.5f * glm::normalize(playerMovementDirection));
             }
         } else {
             player.move(glm::vec3(0));
         }
     }
+    player.update(deltaTime);
 }
 
-int coins = 0;
 void handleItemCollisions(std::vector<GameObject> &objects, Player &player) {
     std::vector<GameObject>::iterator iter;
     for(iter = objects.begin(); iter != objects.end(); ) {
         float distance = glm::length(iter->getPosition() - player.getPosition());
         if(distance < PICKUP_RADIUS) {
             std::cout << "Picked up a coin" << std::endl;
-            coins++;
-            std::cout << "You now have " << coins << " coins." << std::endl;
+            player.coins++;
+            std::cout << "You now have " << player.coins << " coins." << std::endl;
             iter = objects.erase(iter);
         } else {
             iter++;
@@ -336,13 +386,6 @@ int main(int argc, const char *argv[]) {
     monkey.addAnimation(runAnim);
 
     Texture texture("assets/textures/bricks.png");
-
-    Environment env;
-    for(unsigned int i = 0; i < l->getLights().size(); i++) {
-        std::cout << "YO" << std::endl;
-        env.addLight(l->getLights()[i]);
-    }
-    env.addLight(Light(glm::vec3(1,1,0)));
 
     Model levelCollision;
     levelCollision.loadFromFile("assets/unfinished/maze_col.obj");
@@ -398,13 +441,13 @@ int main(int argc, const char *argv[]) {
             shaderProgram.setUniform(sstm.str().c_str(), transforms[i]);
         }
 
-        monkey.render(shaderProgram, camera, env, player.getPosition(), player.up, player.currentRotation);
+        monkey.render(shaderProgram, camera, l->environment, player.getPosition(), player.up, player.currentRotation);
         shaderProgram.end();
 
-        l->levelMesh->render(staticShader, camera, env);
+        l->levelMesh->render(staticShader, camera, l->environment);
 
         for(unsigned int i = 0; i < l->gameObjects.size(); i++) {
-            l->gameObjects[i].mesh->render(staticShader, camera, env, l->gameObjects[i].getPosition());
+            l->gameObjects[i].mesh->render(staticShader, camera, l->environment, l->gameObjects[i].getPosition());
         }
 
 		    glfwSwapBuffers(window.window);

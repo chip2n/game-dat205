@@ -56,7 +56,7 @@ Level* ResourceManager::loadLevel(std::string path) {
             glm::vec3 position = glm::vec3(l[i]["position"]["x"].GetDouble(), l[i]["position"]["y"].GetDouble(), l[i]["position"]["z"].GetDouble());
             Light light(position);
             light.intensity = l[i]["intensity"].GetDouble();
-            level.lights.push_back(light);
+            level.environment.addLight(light);
         }
 
         levels.insert(std::pair<std::string, Level>(path, level));

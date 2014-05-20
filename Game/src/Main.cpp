@@ -2,6 +2,7 @@
 #include "Player.h"
 #include <sstream>
 #include <cmath>
+#include <cassert>
 #include "rapidjson/document.h"
 #include "Level.h"
 #include "ResourceManager.h"
@@ -135,7 +136,7 @@ bool pointInsideTriangle(glm::vec3 p, glm::vec3 p0, glm::vec3 p1, glm::vec3 p2) 
     return s > 0 && t > 0 && (s + t) < a;
 }
 
-bool pointInsideMaze(Model &maze, glm::vec3 point) {
+glm::vec3 pointInsideMaze(Model &maze, glm::vec3 point) {
     for(unsigned int i = 0; i < maze.positions.size(); i+=3) {
         glm::vec3 p1 = maze.positions[i];
         glm::vec3 p2 = maze.positions[i+1];
@@ -143,18 +144,143 @@ bool pointInsideMaze(Model &maze, glm::vec3 point) {
 
         if(pointInsideTriangle(point, p1, p2, p3)) {
 //            std::cout << "Point (" << point.x << "," << point.y << "," << point.z << ") is inside (" << p1.x << "," << p1.y << "," << p1.z << "),(" << p2.x << "," << p2.y << "," << p2.z << "),(" << p3.x << "," << p3.y << "," << p3.z << ")" << std::endl;
-            return true;
+            return glm::vec3(0,0,0);
         }
     }
 
-    return false;
+    return glm::vec3(0,0,1);
 }
 
-bool isCollision(Model &levelCollision, Player &player) {
-    if(!pointInsideMaze(levelCollision, player.getPosition())) {
-        return true;
+glm::vec3 isCollision(Model &levelCollision, Player &player) {
+    glm::vec3 edgeNormal = pointInsideMaze(levelCollision, player.getPosition());
+    return edgeNormal;
+}
+
+void printVec3(glm::vec3 v) {
+  std::cout << "(" << v.x << "," << v.y << "," << v.z << ")" << std::endl;
+}
+void printVec2(glm::vec2 v) {
+  std::cout << "(" << v.x << "," << v.y << ")" << std::endl;
+}
+
+
+std::vector<glm::vec3> getTriangle(Model &maze, glm::vec3 point) {
+    std::vector<glm::vec3> v;
+    for(unsigned int i = 0; i < maze.positions.size(); i+=3) {
+        glm::vec3 p1 = maze.positions[i];
+        glm::vec3 p2 = maze.positions[i+1];
+        glm::vec3 p3 = maze.positions[i+2];
+
+        if(pointInsideTriangle(point, p1, p2, p3)) {
+            v.push_back(p1);
+            v.push_back(p2);
+            v.push_back(p3);
+            return v;
+        }
     }
-    return false;
+
+    return v;
+}
+
+// http://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
+glm::vec2 calculateIntersection(glm::vec2 p, glm::vec2 r, glm::vec2 q, glm::vec2 s) {
+    float rxs = r.x * s.y - r.y * s.x;
+    glm::vec2 qmp = q - p;
+    float qmpxr = qmp.x * r.y - qmp.y * r.x;
+    float qmpxs = qmp.x * s.y - qmp.y * s.x;
+
+    float t = qmpxs / rxs;
+    float u = qmpxr / rxs;
+
+    if(rxs != 0 && t >= 0 && t <= 1 && u >= 0 && u <= 1) {
+        return p + t*r;
+    }
+
+    return glm::vec2(0);
+}
+
+glm::vec3 getEdgeCollision(Model &levelCollision, glm::vec3 oldPosition3D, glm::vec3 newPosition3D) {
+    assert(pointInsideMaze(levelCollision, oldPosition3D) == glm::vec3(0));
+
+    glm::vec2 oldPosition = glm::vec2(oldPosition3D.x, oldPosition3D.z);
+    glm::vec2 newPosition = glm::vec2(newPosition3D.x, newPosition3D.z);
+
+    glm::vec2 moveDirection = newPosition - oldPosition;
+
+    std::vector<glm::vec3> oldTriangle = getTriangle(levelCollision, oldPosition3D);
+    std::vector<glm::vec3> newTriangle = getTriangle(levelCollision, newPosition3D);
+
+    if(oldTriangle.size() == 3 && newTriangle.size() == 0) {
+      glm::vec2 p1 = glm::vec2(oldTriangle[0].x, oldTriangle[0].z);
+      glm::vec2 p2 = glm::vec2(oldTriangle[1].x, oldTriangle[1].z);
+      glm::vec2 p3 = glm::vec2(oldTriangle[2].x, oldTriangle[2].z);
+
+      glm::vec2 i1 = calculateIntersection(p1, p2-p1, oldPosition, moveDirection);
+      glm::vec2 i2 = calculateIntersection(p2, p3-p2, oldPosition, moveDirection);
+      glm::vec2 i3 = calculateIntersection(p3, p1-p3, oldPosition, moveDirection);
+      std::cout << "---------" << std::endl;
+
+      if(i1 != glm::vec2(0)) {
+          std::cout << "Intersection point: ";
+          printVec2(i1);
+          // find edge normal
+          glm::vec2 normal = glm::vec2(i1.y, -i1.x);
+          glm::vec2 o = p3 - p1;
+          if(glm::dot(normal, o) < 0 ) {
+              normal = -normal;
+          }
+          return glm::vec3(normal.x, 0, normal.y);
+      }
+      if(i2 != glm::vec2(0)) {
+          std::cout << "Intersection point: ";
+          printVec2(i2);
+          // find edge normal
+          glm::vec2 normal = glm::vec2(i1.y, -i1.x);
+          glm::vec2 o = p1 - p2;
+          if(glm::dot(normal, o) < 0 ) {
+              normal = -normal;
+          }
+          return glm::vec3(normal.x, 0, normal.y);
+      }
+      if(i3 != glm::vec2(0)) {
+          std::cout << "Intersection point: ";
+          printVec2(i3);
+          // find edge normal
+          glm::vec2 normal = glm::vec2(i1.y, -i1.x);
+          glm::vec2 o = p2 - p3;
+          if(glm::dot(normal, o) < 0 ) {
+              normal = -normal;
+          }
+          return glm::vec3(normal.x, 0, normal.y);
+      }
+    }
+
+    return glm::vec3(0,0,0);
+}
+
+
+
+
+void handlePlayerMovement(float deltaTime, Model &levelCollision) {
+    if(player.isControllable()) {
+        player.rotate(playerRotation, glm::vec3(0,1,0), 0.15f);
+
+        if(playerMovementDirection != glm::vec3(0)) {
+            glm::vec3 oldPosition = player.getPosition();
+            glm::vec3 n = getEdgeCollision(levelCollision, oldPosition, oldPosition + playerMovementDirection * 2.5f * deltaTime);
+            std::cout << "normal: (" << n.x << "," << n.y << "," << n.z << ")" << std::endl;
+            player.move(glm::normalize(playerMovementDirection));
+            player.update(deltaTime);
+            if(isCollision(levelCollision, player) != glm::vec3(0)) {
+                player.setPosition(oldPosition);
+                player.move(glm::vec3(0));
+            } else {
+            camera.move((float)deltaTime * 2.5f * glm::normalize(playerMovementDirection));
+            }
+        } else {
+            player.move(glm::vec3(0));
+        }
+    }
 }
 
 int coins = 0;
@@ -222,9 +348,6 @@ int main(int argc, const char *argv[]) {
     levelCollision.loadFromFile("assets/unfinished/maze_col.obj");
     ModelInstance levelCollisionInstance(&levelCollision);
 
-    Mesh coin;
-    coin.loadMesh("assets/unfinished/coin.obj");
-
     ShadowMap shadowMap(shadowmapShaderProgram);
 
     double lastTime = glfwGetTime();
@@ -232,8 +355,12 @@ int main(int argc, const char *argv[]) {
     double runTime = 0;
     double restTime = 0;
     glm::vec3 currentCubeNormal = glm::vec3(0,1,0);
-	while(!glfwWindowShouldClose(window.window)) {
+
+	  while(!glfwWindowShouldClose(window.window)) {
+        // clear the screen and depth buffer
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+        // enable some common options
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_CULL_FACE);
         glEnable(GL_TEXTURE_2D);
@@ -241,29 +368,11 @@ int main(int argc, const char *argv[]) {
         glEnable(GL_BLEND);
         glCullFace(GL_BACK);
 
-        std::cout << "Player z: " << player.getPosition().z << std::endl;
-
+        // calculate the new deltaTime and the start time of the render loop
         deltaTime = glfwGetTime() - lastTime;
         lastTime = glfwGetTime();
 
-        if(player.isControllable()) {
-            player.rotate(playerRotation, currentCubeNormal, 0.15f);
-
-            if(playerMovementDirection != glm::vec3(0)) {
-                glm::vec3 oldPosition = player.getPosition();
-                player.move(glm::normalize(playerMovementDirection));
-                player.update(deltaTime);
-                if(isCollision(levelCollision, player)) {
-                    player.setPosition(oldPosition);
-                    player.move(glm::vec3(0));
-                } else {
-                camera.move((float)deltaTime * 2.5f * glm::normalize(playerMovementDirection));
-                }
-            } else {
-                player.move(glm::vec3(0));
-            }
-        }
-
+        handlePlayerMovement(deltaTime, levelCollision);
         handleItemCollisions(l->gameObjects, player);
 
         camera.lookAt(player.getPosition());
@@ -293,13 +402,12 @@ int main(int argc, const char *argv[]) {
         shaderProgram.end();
 
         l->levelMesh->render(staticShader, camera, env);
-        //coin.render(staticShader, camera, env);
 
         for(unsigned int i = 0; i < l->gameObjects.size(); i++) {
             l->gameObjects[i].mesh->render(staticShader, camera, env, l->gameObjects[i].getPosition());
         }
 
-		glfwSwapBuffers(window.window);
-		glfwPollEvents();
-	}
+		    glfwSwapBuffers(window.window);
+	    	glfwPollEvents();
+  	}
 }

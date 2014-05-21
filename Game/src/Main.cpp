@@ -94,7 +94,6 @@ static void resize_callback(GLFWwindow* window, int w, int h) {
     glViewport(0, 0, width, height);
 }
 
-
 float sign(glm::vec3 p1, glm::vec3 p2, glm::vec3 p3) {
     return (p1.x - p3.x) * (p2.z - p3.z) * (p2.x - p3.x) * (p1.z - p3.z);
 }
@@ -116,26 +115,19 @@ bool pointInsideTriangle(glm::vec3 p, glm::vec3 p0, glm::vec3 p1, glm::vec3 p2) 
     return s > 0 && t > 0 && (s + t) < a;
 }
 
-glm::vec3 pointInsideMaze(Model &maze, glm::vec3 point) {
+bool pointInsideMaze(Model &maze, glm::vec3 point) {
     for(unsigned int i = 0; i < maze.positions.size(); i+=3) {
         glm::vec3 p1 = maze.positions[i];
         glm::vec3 p2 = maze.positions[i+1];
         glm::vec3 p3 = maze.positions[i+2];
 
         if(pointInsideTriangle(point, p1, p2, p3)) {
-            return glm::vec3(0,0,0);
+            return true;
         }
     }
 
-    return glm::vec3(0,0,1);
+    return false;
 }
-
-glm::vec3 isCollision(Model &levelCollision, Player &player) {
-    glm::vec3 edgeNormal = pointInsideMaze(levelCollision, player.getPosition());
-    return edgeNormal;
-}
-
-
 
 std::vector<glm::vec3> getTriangle(Model &maze, glm::vec3 point) {
     std::vector<glm::vec3> v;
@@ -180,10 +172,6 @@ struct CollisionData {
 };
 
  CollisionData getEdgeCollision(Model &levelCollision, glm::vec3 oldPosition3D, glm::vec3 newPosition3D) {
-    //assert(pointInsideMaze(levelCollision, oldPosition3D) == glm::vec3(0));
-
-
-
     glm::vec2 oldPosition = glm::vec2(oldPosition3D.x, oldPosition3D.z);
     glm::vec2 newPosition = glm::vec2(newPosition3D.x, newPosition3D.z);
 
@@ -212,12 +200,12 @@ struct CollisionData {
           data.newPosition = glm::vec3(i1.x, oldPosition3D.y, i1.y);
           data.newPosition = oldPosition3D;
           if(moveDirection.x != 0) {
-              if(pointInsideMaze(levelCollision, data.newPosition + glm::vec3(moveDirection.x,0,0)) == glm::vec3(0)) {
+              if(pointInsideMaze(levelCollision, data.newPosition + glm::vec3(moveDirection.x,0,0))) {
                 data.newPosition += glm::vec3(moveDirection.x,0,0);
               }
           }
           if(moveDirection.y != 0) {
-              if(pointInsideMaze(levelCollision, data.newPosition + glm::vec3(0,0,moveDirection.y)) == glm::vec3(0)) {
+              if(pointInsideMaze(levelCollision, data.newPosition + glm::vec3(0,0,moveDirection.y))) {
                 data.newPosition += glm::vec3(0,0,moveDirection.y);
               }
           }
@@ -234,12 +222,12 @@ struct CollisionData {
           data.newPosition = glm::vec3(i2.x, oldPosition3D.y, i2.y);
           data.newPosition = oldPosition3D;
           if(moveDirection.x != 0) {
-              if(pointInsideMaze(levelCollision, data.newPosition + glm::vec3(moveDirection.x,0,0)) == glm::vec3(0)) {
+              if(pointInsideMaze(levelCollision, data.newPosition + glm::vec3(moveDirection.x,0,0))) {
                 data.newPosition += glm::vec3(moveDirection.x,0,0);
               }
           }
           if(moveDirection.y != 0) {
-              if(pointInsideMaze(levelCollision, data.newPosition + glm::vec3(0,0,moveDirection.y)) == glm::vec3(0)) {
+              if(pointInsideMaze(levelCollision, data.newPosition + glm::vec3(0,0,moveDirection.y))) {
                 data.newPosition += glm::vec3(0,0,moveDirection.y);
               }
           }
@@ -256,12 +244,12 @@ struct CollisionData {
           data.newPosition = glm::vec3(i3.x, oldPosition3D.y, i3.y);
           data.newPosition = oldPosition3D;
           if(moveDirection.x != 0) {
-              if(pointInsideMaze(levelCollision, data.newPosition + glm::vec3(moveDirection.x,0,0)) == glm::vec3(0)) {
+              if(pointInsideMaze(levelCollision, data.newPosition + glm::vec3(moveDirection.x,0,0))) {
                 data.newPosition += glm::vec3(moveDirection.x,0,0);
               }
           }
           if(moveDirection.y != 0) {
-              if(pointInsideMaze(levelCollision, data.newPosition + glm::vec3(0,0,moveDirection.y)) == glm::vec3(0)) {
+              if(pointInsideMaze(levelCollision, data.newPosition + glm::vec3(0,0,moveDirection.y))) {
                 data.newPosition += glm::vec3(0,0,moveDirection.y);
               }
           }

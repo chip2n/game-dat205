@@ -61,6 +61,14 @@ Level* ResourceManager::loadLevel(std::string path) {
 
         levels.insert(std::pair<std::string, Level>(path, level));
 
+        const rapidjson::Value& wl = d["worldLight"]["direction"];
+        double x = wl["x"].GetDouble();
+        double y = wl["y"].GetDouble();
+        double z = wl["z"].GetDouble();
+        DirectionalLight dir;
+        dir.direction = glm::vec3(x, y, z);
+        level.environment.worldLight = dir;
+
         return &levels[path];
     } else {
         return &levels[path];

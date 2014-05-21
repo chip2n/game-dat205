@@ -101,7 +101,6 @@ bool Mesh::initFromScene(const aiScene* scene, const string& fileName) {
     glBindBuffer(GL_ARRAY_BUFFER, buffers[BONE_VBO]);
     glBufferData(GL_ARRAY_BUFFER, sizeof(bones[0]) * bones.size(), &bones[0], GL_STATIC_DRAW);
     glEnableVertexAttribArray(BONE_ID_LOCATION);
-    std::cout << "YOLO" << std::endl;
     glVertexAttribIPointer(BONE_ID_LOCATION, 4, GL_INT, sizeof(VertexBoneData), (const GLvoid*)0);
     glEnableVertexAttribArray(BONE_WEIGHT_LOCATION);
     glVertexAttribPointer(BONE_WEIGHT_LOCATION, 4, GL_FLOAT, GL_FALSE, sizeof(VertexBoneData), (const GLvoid*)16);
@@ -164,7 +163,6 @@ bool Mesh::initMaterials(const aiScene* pScene, const string& fileName) {
 }
 
 bool Mesh::initLights(const aiScene* pScene, const string& fileName) {
-    std::cout << "Number of lights: " << pScene->mNumLights << std::endl;
     for(unsigned int i = 0; i < pScene->mNumLights; i++) {
         aiVector3D position = pScene->mLights[i]->mPosition;
         std::cout << pScene->mLights[i]->mName.C_Str() << ": (" << position.x << "," << position.y << "," << position.z << ")" << std::endl;
@@ -548,6 +546,8 @@ void Mesh::render(ShaderProgram &shaderProgram, Camera &camera, Environment &env
         sstm << "lightPos[" << i << "]";
         shaderProgram.setUniform(sstm.str().c_str(), env.getLights()[i].getPosition());
     }
+
+    shaderProgram.setUniform("worldLight", env.worldLight.direction);
 
     glBindVertexArray(vao);
 

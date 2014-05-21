@@ -15,6 +15,7 @@
 #include "ModelInstance.h"
 #include "Environment.h"
 #include "Light.h"
+#include "DirectionalLight.h"
 #include "Billboard.h"
 #include "Texture.h"
 #include "ShadowMap.h"

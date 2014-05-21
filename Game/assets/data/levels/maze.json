@@ -25,6 +25,11 @@
             "intensity": 1.0
         }
     ],
+    "worldLight": {
+            "position": { "x": 0, "y": 0, "z": 0 },
+            "intensity": 1.0,
+            "direction": { "x": 1, "y": -1, "z": 1 }
+    },
     "objects": [
         {
             "id": "coin",

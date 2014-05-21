@@ -35,6 +35,7 @@ set(RENDERENGINE_SRCS
     ${PROJECT_SOURCE_DIR}/ModelInstance.cpp
     ${PROJECT_SOURCE_DIR}/Environment.cpp
     ${PROJECT_SOURCE_DIR}/Light.cpp
+    ${PROJECT_SOURCE_DIR}/DirectionalLight.cpp
     ${PROJECT_SOURCE_DIR}/Billboard.cpp
     ${PROJECT_SOURCE_DIR}/Texture.cpp
     ${PROJECT_SOURCE_DIR}/ShadowMap.cpp

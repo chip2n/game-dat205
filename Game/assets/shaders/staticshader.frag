@@ -6,7 +6,6 @@ in vec4 shadowCoord;
 out vec4 color;
 uniform sampler2D texSampler;
 uniform sampler2D shadowMap;
-uniform vec3 worldLight;
 uniform vec3 lightPos[5];
 
 void main() {
@@ -16,22 +15,24 @@ void main() {
         if(falloff < 0.0001) break;
         vec3 lightDir = normalize(lightPos[i] - worldPosition);
         float theta = dot(outNormal, lightDir);
-        float worldTheta = dot(outNormal, -worldLight);
-        vec3 worldDiffuse = vec3(0.5, 0.0, 0.0)*worldTheta;
 
         vec3 diffuse = vec3(0.5, 0.5, 0.5)*theta;
         vec3 ambient = vec3(0.1, 0.1, 0.1);
 
         float visibility = 1.0;
-        float bias = 0.005;
+        float bias = 0.0025;
         if( texture(shadowMap, shadowCoord.xy).z < shadowCoord.z - bias) {
             visibility = 0.1;
         }
         //vec4 phong = vec4(falloff*visibility*(ambient + diffuse), 1.0);
         phong += vec4(falloff*visibility*(ambient+diffuse), 0.0);
-        phong += vec4(visibility*worldDiffuse, 0.0);
     }
 
+    vec3 heightFalloff = vec3(1,1,1);
+    if(worldPosition.y > 1.0) {
+        heightFalloff = max(0, 1.0 - (worldPosition.y - 1.0)) * heightFalloff;
+    }
     vec4 c = texture(texSampler, texCoords);
-    color = phong * c;
+    color = vec4(heightFalloff, 1.0) * phong * c;
+
 }

@@ -1,6 +1,9 @@
 #include <iostream>
 #include "ShadowMap.h"
 
+#define SHADOWMAP_WIDTH 2048
+#define SHADOWMAP_HEIGHT 2048
+
 // http://www.altdevblogaday.com/2011/01/30/omni-directional-shadow-mapping/
 
 ShadowMap::ShadowMap(ShaderProgram &program) : shaderProgram(program) {
@@ -9,7 +12,7 @@ ShadowMap::ShadowMap(ShaderProgram &program) : shaderProgram(program) {
 
     glGenTextures(1, &depthTexture);
     glBindTexture(GL_TEXTURE_2D, depthTexture);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, 1024, 1024, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, SHADOWMAP_WIDTH, SHADOWMAP_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -25,8 +28,13 @@ ShadowMap::ShadowMap(ShaderProgram &program) : shaderProgram(program) {
 }
 
 void ShadowMap::begin() {
+    double ViewPortParams[4];
+    glGetDoublev(GL_VIEWPORT, ViewPortParams);
+    prevWidth = ViewPortParams[2];
+    prevHeight = ViewPortParams[3];
+
     glBindFramebuffer(GL_FRAMEBUFFER, shadowFramebuffer);
-    glViewport(0, 0, 1024, 1024);
+    glViewport(0, 0, SHADOWMAP_WIDTH, SHADOWMAP_HEIGHT);
     glDrawBuffer(GL_NONE);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     shaderProgram.begin();
@@ -36,29 +44,25 @@ void ShadowMap::end() {
     shaderProgram.end();
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glDrawBuffer(GL_BACK);
+    glViewport(0, 0, prevWidth, prevHeight);
+  std::cout << "GFHDFHGFG" << prevWidth << prevHeight << std::endl;
 }
 
-void ShadowMap::render(ModelInstance &instance) {
-    glm::vec3 lightInvDir = glm::vec3(10, 4, 2);
+void ShadowMap::render(Mesh &mesh, glm::vec3 position) {
     glm::mat4 depthProjectionMatrix = glm::ortho<float>(-10,10,-10,10,-10,20);
-    glm::mat4 depthViewMatrix = glm::lookAt(lightInvDir, glm::vec3(0,0,0), glm::vec3(0,1,0));
-    glm::mat4 depthModelMatrix = instance.getModelMatrix();
+    glm::mat4 depthViewMatrix = glm::lookAt(sunPosition, sunFocus, glm::vec3(0,1,0));
+    //glm::mat4 depthModelMatrix = instance.getModelMatrix();
+    glm::mat4 depthModelMatrix;
+    depthModelMatrix = glm::translate(depthModelMatrix, position);
     glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
-
     shaderProgram.setUniform("depthMVP", depthMVP);
-    glBindVertexArray(instance.model->vao);
-    glBindBuffer(GL_ARRAY_BUFFER, instance.model->vbo);
-
-    glDrawArrays(GL_TRIANGLES, 0, instance.model->getNumberOfVertices());
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
+    mesh.render(shaderProgram);
+    shaderProgram.begin();
 }
 
 glm::mat4 ShadowMap::getBiasMVP(glm::vec3 position) {
-    glm::vec3 lightInvDir = glm::vec3(10, 4, 2);
     glm::mat4 depthProjectionMatrix = glm::ortho<float>(-10,10,-10,10,-10,20);
-    glm::mat4 depthViewMatrix = glm::lookAt(lightInvDir, glm::vec3(0,0,0), glm::vec3(0,1,0));
+    glm::mat4 depthViewMatrix = glm::lookAt(sunPosition, glm::vec3(0,0,0), glm::vec3(0,1,0));
     glm::mat4 depthModelMatrix = glm::mat4(1.0);
     depthModelMatrix = glm::translate(depthModelMatrix, position);
     glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;

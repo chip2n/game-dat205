@@ -476,7 +476,6 @@ void Mesh::render(ShaderProgram &shaderProgram, Camera &camera, Environment &env
         shaderProgram.setUniform(sstm.str().c_str(), env.getLights()[i].getPosition());
     }
 
-
     glBindVertexArray(vao);
 
     for(uint i = 0; i < meshEntries.size(); i++) {
@@ -534,6 +533,34 @@ void Mesh::render(ShaderProgram &shaderProgram, Camera &camera, Environment &env
     shaderProgram.end();
 }
 
+void Mesh::render(ShaderProgram &shaderProgram) {
+    shaderProgram.begin();
+
+    glm::mat4 modelM;
+    shaderProgram.setUniform("modelMatrix", modelM);
+
+    glBindVertexArray(vao);
+
+    for(uint i = 0; i < meshEntries.size(); i++) {
+        const uint materialIndex = meshEntries[i].materialIndex;
+        assert(materialIndex < textures.size());
+
+        if(textures[materialIndex]) {
+            textures[materialIndex]->bind();
+        }
+        
+        glDrawElementsBaseVertex(GL_TRIANGLES,
+                                 meshEntries[i].numIndices,
+                                 GL_UNSIGNED_INT,
+                                 (void*)(sizeof(uint) * meshEntries[i].baseIndex),
+                                 meshEntries[i].baseVertex);
+    }
+
+    glBindVertexArray(0);
+
+    shaderProgram.end();
+}
+
 void Mesh::render(ShaderProgram &shaderProgram, Camera &camera, Environment &env, glm::vec3 position) {
     shaderProgram.begin();
     shaderProgram.setUniform("modelViewProjectionMatrix", camera.getCombinedMatrix());
@@ -547,7 +574,6 @@ void Mesh::render(ShaderProgram &shaderProgram, Camera &camera, Environment &env
         shaderProgram.setUniform(sstm.str().c_str(), env.getLights()[i].getPosition());
     }
 
-    shaderProgram.setUniform("worldLight", env.worldLight.direction);
 
     glBindVertexArray(vao);
 

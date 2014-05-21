@@ -69,6 +69,7 @@ class Mesh {
         void render(ShaderProgram &shaderProgram, Camera &camera, Environment &env, glm::vec3 position, glm::vec3 up, glm::quat rotation);
         void render(ShaderProgram &shaderProgram, Camera &camera, Environment &env);
         void render(ShaderProgram &shaderProgram, Camera &camera, Environment &env, glm::vec3 position);
+        void render(ShaderProgram &shaderProgram);
         void addAnimation(Animation animation);
     private:
         uint numBones = 0;

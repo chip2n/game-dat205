@@ -336,6 +336,8 @@ int main(int argc, const char *argv[]) {
 
     DirectionalLight llll(glm::vec3(0,0,0), glm::vec3(1,0,0));
     ShadowMap shadowMap(shadowmapShaderProgram);
+    shadowMap.sunPosition = glm::vec3(4, 8, 4);
+    shadowMap.sunFocus = glm::vec3(0,0,0);
 
     double lastTime = glfwGetTime();
     double deltaTime = lastTime;
@@ -384,10 +386,31 @@ int main(int argc, const char *argv[]) {
             shaderProgram.setUniform(sstm.str().c_str(), transforms[i]);
         }
 
+
+
+        shadowMap.begin();
+        shadowMap.render(*(l->levelMesh), glm::vec3(0));
+        for(unsigned int i = 0; i < l->gameObjects.size(); i++) {
+            shadowMap.render(*(l->gameObjects[i].mesh), l->gameObjects[i].getPosition());
+        }
+        shadowMap.end();
+        
+        glActiveTexture(GL_TEXTURE1);
+        glBindTexture(GL_TEXTURE_2D, shadowMap.depthTexture);
+        glActiveTexture(GL_TEXTURE0);
+        staticShader.begin();
+        staticShader.setUniform("texSampler", 0);
+        staticShader.setUniform("shadowMap", 1);
+        glm::mat4 depthBiasMVP = shadowMap.getBiasMVP(glm::vec3(0,0,0));
+        staticShader.setUniform("depthBiasMVP", depthBiasMVP);
+        staticShader.end();
+        l->levelMesh->render(staticShader, camera, l->environment);
+
+
+
         monkey.render(shaderProgram, camera, l->environment, player.getPosition(), player.up, player.currentRotation);
         shaderProgram.end();
 
-        l->levelMesh->render(staticShader, camera, l->environment);
 
         for(unsigned int i = 0; i < l->gameObjects.size(); i++) {
             l->gameObjects[i].mesh->render(staticShader, camera, l->environment, l->gameObjects[i].getPosition());

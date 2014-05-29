@@ -1,6 +1,8 @@
 #ifndef SHADOWMAP_H
 #define SHADOWNAP_H
 
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include "ShaderProgram.h"
 #include "Mesh.h"
 
@@ -9,7 +11,7 @@ class ShadowMap {
         ShadowMap(ShaderProgram &program);
         void begin();
         void end();
-        void render(Mesh &mesh, glm::vec3 position);
+        void render(Mesh &mesh, glm::vec3 position, glm::quat rotation);
         glm::mat4 getBiasMVP(glm::vec3 position);
         ShaderProgram &shaderProgram;
         GLuint shadowFramebuffer;

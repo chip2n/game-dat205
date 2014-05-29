@@ -1,4 +1,5 @@
 #include <iostream>
+#include <glm/gtc/matrix_transform.hpp>
 #include "ShadowMap.h"
 
 #define SHADOWMAP_WIDTH 2048
@@ -47,12 +48,12 @@ void ShadowMap::end() {
     glViewport(0, 0, prevWidth, prevHeight);
 }
 
-void ShadowMap::render(Mesh &mesh, glm::vec3 position) {
+void ShadowMap::render(Mesh &mesh, glm::vec3 position, glm::quat rotation) {
     glm::mat4 depthProjectionMatrix = glm::ortho<float>(-10,10,-10,10,-10,20);
     glm::mat4 depthViewMatrix = glm::lookAt(sunPosition, sunFocus, glm::vec3(0,1,0));
     //glm::mat4 depthModelMatrix = instance.getModelMatrix();
     glm::mat4 depthModelMatrix;
-    depthModelMatrix = glm::translate(depthModelMatrix, position);
+    depthModelMatrix = glm::translate(depthModelMatrix, position) * glm::toMat4(rotation);
     glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
     shaderProgram.setUniform("depthMVP", depthMVP);
     mesh.render(shaderProgram);

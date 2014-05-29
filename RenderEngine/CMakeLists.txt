@@ -30,6 +30,7 @@ endif(WIN32)
 set(RENDERENGINE_SRCS 
     ${PROJECT_SOURCE_DIR}/ShaderProgram.cpp
     ${PROJECT_SOURCE_DIR}/Camera.cpp
+    ${PROJECT_SOURCE_DIR}/ParticleEmitter.cpp
     ${PROJECT_SOURCE_DIR}/Model.cpp
     #    ${PROJECT_SOURCE_DIR}/SkinnedModel.cpp
     ${PROJECT_SOURCE_DIR}/ModelInstance.cpp

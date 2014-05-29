@@ -488,6 +488,7 @@ void Mesh::renderMesh(ShaderProgram &shaderProgram, glm::vec3 position, glm::qua
     modelM = glm::translate(modelM, position);
     modelM = modelM * glm::toMat4(rotation);
     shaderProgram.setUniform("modelMatrix", modelM);
+    shaderProgram.setUniform("receivesShadows", true);
     for(uint i = 0; i < meshEntries.size(); i++) {
         const uint materialIndex = meshEntries[i].materialIndex;
         assert(materialIndex < textures.size());

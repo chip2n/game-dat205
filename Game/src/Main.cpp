@@ -7,6 +7,8 @@
 #include "Level.h"
 #include "ResourceManager.h"
 #include "Debug.h"
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/quaternion.hpp>
 
 #define PICKUP_RADIUS 0.3
 
@@ -328,11 +330,14 @@ int main(int argc, const char *argv[]) {
     Animation runAnim = Animation("run", 296, 320, 320, 9.0f);
     playerMesh.addAnimation(runAnim);
 
-    Texture texture("assets/textures/bricks.png");
+    Texture lightTexture("assets/unfinished/fire.png");
 
     Model levelCollision;
     levelCollision.loadFromFile("assets/unfinished/maze_col.obj");
     ModelInstance levelCollisionInstance(&levelCollision);
+
+    ParticleEmitter emitter;
+    emitter.position = glm::vec3(1.57613, 1.21270, -1.95231);
 
     DirectionalLight llll(glm::vec3(0,0,0), glm::vec3(1,0,0));
     ShadowMap shadowMap(shadowmapShaderProgram);
@@ -386,10 +391,12 @@ int main(int argc, const char *argv[]) {
             shaderProgram.setUniform(sstm.str().c_str(), transforms[i]);
         }
 
+        glm::quat coinRotation = glm::angleAxis((float)(150*lastTime), glm::vec3(0,1,0));
+
         shadowMap.begin();
-        shadowMap.render(*(l->levelMesh), glm::vec3(0));
+        shadowMap.render(*(l->levelMesh), glm::vec3(0), glm::quat());
         for(unsigned int i = 0; i < l->gameObjects.size(); i++) {
-            shadowMap.render(*(l->gameObjects[i].mesh), l->gameObjects[i].getPosition());
+            shadowMap.render(*(l->gameObjects[i].mesh), l->gameObjects[i].getPosition(), coinRotation);
         }
         shadowMap.end();
         
@@ -411,13 +418,18 @@ int main(int argc, const char *argv[]) {
 
 
 
+        lightTexture.bind();
+        emitter.update(camera, l->environment, staticShader, deltaTime);
+        lightTexture.unbind();
 
 
         staticShader.begin();
         staticShader.setUniform("isLightSource", true);
         staticShader.end();
+
+
         for(unsigned int i = 0; i < l->gameObjects.size(); i++) {
-            l->gameObjects[i].mesh->render(staticShader, camera, l->environment, l->gameObjects[i].getPosition());
+            l->gameObjects[i].mesh->render(staticShader, camera, l->environment, l->gameObjects[i].getPosition(), glm::vec3(0,1,0), coinRotation);
         }
         staticShader.begin();
         staticShader.setUniform("isLightSource", false);

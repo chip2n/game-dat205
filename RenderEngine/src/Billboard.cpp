@@ -41,8 +41,12 @@ void Billboard::render(Camera &camera, Environment &env, ShaderProgram &shaderPr
     glm::mat4 modelM;
     modelM = glm::translate(modelM, position);
     modelM = glm::inverse(glm::lookAt(position, camera.position, glm::vec3(0.0f,1.0f,0.0f)));
+    modelM = glm::scale(modelM, glm::vec3(size));
     shaderProgram.setUniform("modelMatrix", modelM);
     shaderProgram.setUniform("lightPos", env.getLights()[0].getPosition());
+    shaderProgram.setUniform("receivesShadows", false);
+    shaderProgram.setUniform("isLightSource", isLightSource);
+
     glDrawArrays(GL_TRIANGLES, 0, 6);
     shaderProgram.end();
 

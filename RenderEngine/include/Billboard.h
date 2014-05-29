@@ -13,11 +13,14 @@ class Billboard {
         Billboard();
         void render(Camera &camera, Environment &env, ShaderProgram &shaderProgram);
         void move(glm::vec3 vec);
+        void setSize(float size);
+        glm::vec3 position;
+        float size = -10.0f;
+        bool isLightSource = true;
     private:
         GLuint vao;
         GLuint vbo;
         static GLfloat plane[];
-        glm::vec3 position;
 };
 
 #endif

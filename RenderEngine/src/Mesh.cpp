@@ -6,7 +6,7 @@
 #include <sstream>
 #include "Mesh.h"
 
-bool Mesh::loadMesh(const string& fileName) {
+bool Mesh::loadFromFile(const string& fileName) {
     glGenVertexArrays(1, &vao);
     glBindVertexArray(vao);
 
@@ -34,12 +34,6 @@ bool Mesh::loadMesh(const string& fileName) {
 bool Mesh::initFromScene(const aiScene* scene, const string& fileName) {
     meshEntries.resize(scene->mNumMeshes);
 
-    vector<glm::vec3> positions;
-    vector<glm::vec3> normals;
-    vector<glm::vec2> texCoords;
-    vector<VertexBoneData> bones;
-    vector<uint> indices;
-
     uint numVertices = 0;
     uint numIndices = 0;
 
@@ -61,7 +55,7 @@ bool Mesh::initFromScene(const aiScene* scene, const string& fileName) {
 
     for(uint i = 0; i < meshEntries.size(); i++) {
         const aiMesh* paiMesh = scene->mMeshes[i];
-        initMesh(i, paiMesh, positions, normals, texCoords, bones, indices);
+        initMesh(i, paiMesh);
     }
 
     /*
@@ -165,21 +159,13 @@ bool Mesh::initMaterials(const aiScene* pScene, const string& fileName) {
 bool Mesh::initLights(const aiScene* pScene, const string& fileName) {
     for(unsigned int i = 0; i < pScene->mNumLights; i++) {
         aiVector3D position = pScene->mLights[i]->mPosition;
-        std::cout << pScene->mLights[i]->mName.C_Str() << ": (" << position.x << "," << position.y << "," << position.z << ")" << std::endl;
         Light light(glm::vec3(position.x, position.y, position.z));
         lights.push_back(light);
     }
     return true;
 }
 
-void Mesh::initMesh(uint meshIndex,
-                    const aiMesh* paiMesh,
-                    vector<glm::vec3>& positions,
-                    vector<glm::vec3>& normals,
-                    vector<glm::vec2>& texCoords, 
-                    vector<VertexBoneData>& bones,
-                    vector<uint>& indices)
-{
+void Mesh::initMesh(uint meshIndex, const aiMesh* paiMesh) {
     const aiVector3D zero3D(0.0f, 0.0f, 0.0f);
 
     for(uint i = 0; i < paiMesh->mNumVertices; i++) {
@@ -192,7 +178,7 @@ void Mesh::initMesh(uint meshIndex,
         texCoords.push_back(glm::vec2(pTexCoord->x, pTexCoord->y));
     }
 
-    loadBones(meshIndex, paiMesh, bones);
+    initBones(meshIndex, paiMesh, bones);
 
     for(uint i = 0; i < paiMesh->mNumFaces; i++) {
         const aiFace& face = paiMesh->mFaces[i];
@@ -201,10 +187,9 @@ void Mesh::initMesh(uint meshIndex,
         indices.push_back(face.mIndices[1]);
         indices.push_back(face.mIndices[2]);
     }
-
 }
 
-void Mesh::loadBones(uint meshIndex, const aiMesh* pMesh, vector<VertexBoneData>& bones) {
+void Mesh::initBones(uint meshIndex, const aiMesh* pMesh, vector<VertexBoneData>& bones) {
     for(uint i = 0; i < pMesh->mNumBones; i++) {
         uint boneIndex = 0;
         std::string boneName(pMesh->mBones[i]->mName.data);
@@ -219,7 +204,6 @@ void Mesh::loadBones(uint meshIndex, const aiMesh* pMesh, vector<VertexBoneData>
         } else {
             boneIndex = boneMapping[boneName];
         }
-
 
         for(uint j = 0; j < pMesh->mBones[i]->mNumWeights; j++) {
             uint vertexID = meshEntries[meshIndex].baseVertex + pMesh->mBones[i]->mWeights[j].mVertexId;
@@ -349,7 +333,7 @@ void Mesh::calcInterpolatedScaling(aiVector3D &Out, float AnimationTime, const a
         return;
     }
 
-    uint ScalingIndex = FindScaling(AnimationTime, pNodeAnim);
+    uint ScalingIndex = findScaling(AnimationTime, pNodeAnim);
     uint NextScalingIndex = (ScalingIndex + 1);
     assert(NextScalingIndex < pNodeAnim->mNumScalingKeys);
     float DeltaTime = (float)(pNodeAnim->mScalingKeys[NextScalingIndex].mTime - pNodeAnim->mScalingKeys[ScalingIndex].mTime);
@@ -412,8 +396,7 @@ void Mesh::calcInterpolatedPosition(aiVector3D &out, float animationTime, const 
     out = start + factor * delta;
 }
 
-uint Mesh::findPosition(float AnimationTime, const aiNodeAnim* pNodeAnim)
-{    
+uint Mesh::findPosition(float AnimationTime, const aiNodeAnim* pNodeAnim) {    
     for (uint i = 0 ; i < pNodeAnim->mNumPositionKeys - 1 ; i++) {
         if (AnimationTime < (float)pNodeAnim->mPositionKeys[i + 1].mTime) {
             return i;
@@ -425,8 +408,7 @@ uint Mesh::findPosition(float AnimationTime, const aiNodeAnim* pNodeAnim)
     return 0;
 }
 
-uint Mesh::FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim)
-{
+uint Mesh::findScaling(float AnimationTime, const aiNodeAnim* pNodeAnim) {
     assert(pNodeAnim->mNumScalingKeys > 0);
     
     for (uint i = 0 ; i < pNodeAnim->mNumScalingKeys - 1 ; i++) {
@@ -440,8 +422,7 @@ uint Mesh::FindScaling(float AnimationTime, const aiNodeAnim* pNodeAnim)
     return 0;
 }
 
-inline void Mesh::copyAiMatrixToGLM(const aiMatrix4x4 *from, glm::mat4 &to)
-{
+inline void Mesh::copyAiMatrixToGLM(const aiMatrix4x4 *from, glm::mat4 &to) {
     to[0][0] = (GLfloat)from->a1; to[1][0] = (GLfloat)from->a2;
     to[2][0] = (GLfloat)from->a3; to[3][0] = (GLfloat)from->a4;
     to[0][1] = (GLfloat)from->b1; to[1][1] = (GLfloat)from->b2;
@@ -452,8 +433,7 @@ inline void Mesh::copyAiMatrixToGLM(const aiMatrix4x4 *from, glm::mat4 &to)
     to[2][3] = (GLfloat)from->d3; to[3][3] = (GLfloat)from->d4;
 }
 
-inline void Mesh::copyAiMatrixToGLM(const aiMatrix3x3 *from, glm::mat3 &to)
-{
+inline void Mesh::copyAiMatrixToGLM(const aiMatrix3x3 *from, glm::mat3 &to) {
     to[0][0] = (GLfloat)from->a1; to[1][0] = (GLfloat)from->a2;
     to[2][0] = (GLfloat)from->a3;
     to[0][1] = (GLfloat)from->b1; to[1][1] = (GLfloat)from->b2;
@@ -466,34 +446,8 @@ void Mesh::render(ShaderProgram &shaderProgram, Camera &camera, Environment &env
     shaderProgram.begin();
     shaderProgram.setUniform("modelViewProjectionMatrix", camera.getCombinedMatrix());
 
-    glm::mat4 modelM;
-    modelM = glm::translate(modelM, position);
-    modelM = modelM * glm::toMat4(rotation);
-    shaderProgram.setUniform("modelMatrix", modelM);
-    for(uint i = 0; i < env.getLights().size(); i++) {
-        std::stringstream sstm;
-        sstm << "lightPos[" << i << "]";
-        shaderProgram.setUniform(sstm.str().c_str(), env.getClosestLights(position)[i].getPosition());
-    }
-
-    glBindVertexArray(vao);
-
-    for(uint i = 0; i < meshEntries.size(); i++) {
-        const uint materialIndex = meshEntries[i].materialIndex;
-        assert(materialIndex < textures.size());
-
-        if(textures[materialIndex]) {
-            textures[materialIndex]->bind();
-        }
-        
-        glDrawElementsBaseVertex(GL_TRIANGLES,
-                                 meshEntries[i].numIndices,
-                                 GL_UNSIGNED_INT,
-                                 (void*)(sizeof(uint) * meshEntries[i].baseIndex),
-                                 meshEntries[i].baseVertex);
-    }
-
-    glBindVertexArray(0);
+    shaderSetupLights(shaderProgram, env.getClosestLights(position));
+    renderMesh(shaderProgram, position, rotation);
 
     shaderProgram.end();
 }
@@ -502,33 +456,8 @@ void Mesh::render(ShaderProgram &shaderProgram, Camera &camera, Environment &env
     shaderProgram.begin();
     shaderProgram.setUniform("modelViewProjectionMatrix", camera.getCombinedMatrix());
 
-    glm::mat4 modelM;
-    shaderProgram.setUniform("modelMatrix", modelM);
-    //shaderProgram.setUniform("lightPos", env.getLights()[0].getPosition());
-    for(uint i = 0; i < env.getLights().size(); i++) {
-        std::stringstream sstm;
-        sstm << "lightPos[" << i << "]";
-        shaderProgram.setUniform(sstm.str().c_str(), env.getLights()[i].getPosition());
-    }
-
-    glBindVertexArray(vao);
-
-    for(uint i = 0; i < meshEntries.size(); i++) {
-        const uint materialIndex = meshEntries[i].materialIndex;
-        assert(materialIndex < textures.size());
-
-        if(textures[materialIndex]) {
-            textures[materialIndex]->bind();
-        }
-        
-        glDrawElementsBaseVertex(GL_TRIANGLES,
-                                 meshEntries[i].numIndices,
-                                 GL_UNSIGNED_INT,
-                                 (void*)(sizeof(uint) * meshEntries[i].baseIndex),
-                                 meshEntries[i].baseVertex);
-    }
-
-    glBindVertexArray(0);
+    shaderSetupLights(shaderProgram, env.getLights());
+    renderMesh(shaderProgram);
 
     shaderProgram.end();
 }
@@ -536,27 +465,7 @@ void Mesh::render(ShaderProgram &shaderProgram, Camera &camera, Environment &env
 void Mesh::render(ShaderProgram &shaderProgram) {
     shaderProgram.begin();
 
-    glm::mat4 modelM;
-    shaderProgram.setUniform("modelMatrix", modelM);
-
-    glBindVertexArray(vao);
-
-    for(uint i = 0; i < meshEntries.size(); i++) {
-        const uint materialIndex = meshEntries[i].materialIndex;
-        assert(materialIndex < textures.size());
-
-        if(textures[materialIndex]) {
-            textures[materialIndex]->bind();
-        }
-        
-        glDrawElementsBaseVertex(GL_TRIANGLES,
-                                 meshEntries[i].numIndices,
-                                 GL_UNSIGNED_INT,
-                                 (void*)(sizeof(uint) * meshEntries[i].baseIndex),
-                                 meshEntries[i].baseVertex);
-    }
-
-    glBindVertexArray(0);
+    renderMesh(shaderProgram);
 
     shaderProgram.end();
 }
@@ -565,18 +474,20 @@ void Mesh::render(ShaderProgram &shaderProgram, Camera &camera, Environment &env
     shaderProgram.begin();
     shaderProgram.setUniform("modelViewProjectionMatrix", camera.getCombinedMatrix());
 
-    glm::mat4 modelM;
-    modelM = glm::translate(modelM, position);
-    shaderProgram.setUniform("modelMatrix", modelM);
-    for(uint i = 0; i < env.getLights().size(); i++) {
-        std::stringstream sstm;
-        sstm << "lightPos[" << i << "]";
-        shaderProgram.setUniform(sstm.str().c_str(), env.getClosestLights(position)[i].getPosition());
-    }
+    shaderSetupLights(shaderProgram, env.getClosestLights(position));
 
+    renderMesh(shaderProgram, position);
 
+    shaderProgram.end();
+}
+
+void Mesh::renderMesh(ShaderProgram &shaderProgram, glm::vec3 position, glm::quat rotation) {
     glBindVertexArray(vao);
 
+    glm::mat4 modelM;
+    modelM = glm::translate(modelM, position);
+    modelM = modelM * glm::toMat4(rotation);
+    shaderProgram.setUniform("modelMatrix", modelM);
     for(uint i = 0; i < meshEntries.size(); i++) {
         const uint materialIndex = meshEntries[i].materialIndex;
         assert(materialIndex < textures.size());
@@ -591,12 +502,16 @@ void Mesh::render(ShaderProgram &shaderProgram, Camera &camera, Environment &env
                                  (void*)(sizeof(uint) * meshEntries[i].baseIndex),
                                  meshEntries[i].baseVertex);
     }
-
     glBindVertexArray(0);
-
-    shaderProgram.end();
 }
 
+void Mesh::shaderSetupLights(ShaderProgram &shaderProgram, std::vector<Light> lights) {
+    for(uint i = 0; i < lights.size(); i++) {
+        std::stringstream sstm;
+        sstm << "lightPos[" << i << "]";
+        shaderProgram.setUniform(sstm.str().c_str(), lights[i].getPosition());
+    }
+}
 
 void Mesh::addAnimation(Animation animation) {
     animationMap[animation.name] = animation;

@@ -45,7 +45,6 @@ void ShadowMap::end() {
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
     glDrawBuffer(GL_BACK);
     glViewport(0, 0, prevWidth, prevHeight);
-  std::cout << "GFHDFHGFG" << prevWidth << prevHeight << std::endl;
 }
 
 void ShadowMap::render(Mesh &mesh, glm::vec3 position) {

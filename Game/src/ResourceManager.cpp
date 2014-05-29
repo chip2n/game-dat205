@@ -7,7 +7,7 @@
 Mesh* ResourceManager::loadMesh(std::string path) {
     if(meshes.find(path) == meshes.end()) {
         Mesh *mesh = new Mesh();
-        mesh->loadMesh(path);
+        mesh->loadFromFile(path);
         meshes.insert(std::pair<std::string, Mesh*>(path, mesh));
         return mesh;
     } else {

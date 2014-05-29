@@ -321,12 +321,12 @@ int main(int argc, const char *argv[]) {
     Level *l = resourceManager.loadLevel("assets/data/levels/maze.json");
     l = resourceManager.loadLevel("assets/data/levels/maze.json");
 
-    Mesh monkey;
-    monkey.loadMesh("assets/unfinished/skull.dae");
+    Mesh playerMesh;
+    playerMesh.loadFromFile("assets/unfinished/skull.dae");
     Animation restAnim = Animation("rest", 9, 249, 333, 12.1f);
-    monkey.addAnimation(restAnim);
+    playerMesh.addAnimation(restAnim);
     Animation runAnim = Animation("run", 296, 320, 320, 9.0f);
-    monkey.addAnimation(runAnim);
+    playerMesh.addAnimation(runAnim);
 
     Texture texture("assets/textures/bricks.png");
 
@@ -373,11 +373,11 @@ int main(int argc, const char *argv[]) {
         if(playerMovementDirection != glm::vec3(0)) {
             runTime += deltaTime;
             restTime = 0;
-            monkey.boneTransform("run", (float)runTime, transforms);
+            playerMesh.boneTransform("run", (float)runTime, transforms);
         } else {
             runTime = 0;
             restTime += deltaTime;
-            monkey.boneTransform("rest", (float)restTime, transforms);
+            playerMesh.boneTransform("rest", (float)restTime, transforms);
         }
 
         for(uint i = 0; i < transforms.size(); i++) {
@@ -385,8 +385,6 @@ int main(int argc, const char *argv[]) {
             sstm << "gBones[" << i << "]";
             shaderProgram.setUniform(sstm.str().c_str(), transforms[i]);
         }
-
-
 
         shadowMap.begin();
         shadowMap.render(*(l->levelMesh), glm::vec3(0));
@@ -408,7 +406,7 @@ int main(int argc, const char *argv[]) {
 
 
 
-        monkey.render(shaderProgram, camera, l->environment, player.getPosition(), player.up, player.currentRotation);
+        playerMesh.render(shaderProgram, camera, l->environment, player.getPosition(), player.up, player.currentRotation);
         shaderProgram.end();
 
 

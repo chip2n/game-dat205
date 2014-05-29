@@ -5,7 +5,7 @@ in vec3 outNormal;
 out vec4 color;
 uniform sampler2D texSampler;
 uniform vec3 worldLight;
-uniform vec3 lightPos[5];
+uniform vec3 lightPos[4];
 
 void main() {
     vec4 phong = vec4(0.0, 0.0, 0.0, 1.0);

@@ -412,9 +412,21 @@ int main(int argc, const char *argv[]) {
         shaderProgram.end();
 
 
+
+
+
+        staticShader.begin();
+        staticShader.setUniform("isLightSource", true);
+        staticShader.end();
         for(unsigned int i = 0; i < l->gameObjects.size(); i++) {
             l->gameObjects[i].mesh->render(staticShader, camera, l->environment, l->gameObjects[i].getPosition());
         }
+        staticShader.begin();
+        staticShader.setUniform("isLightSource", false);
+        staticShader.end();
+
+
+
 
 		    glfwSwapBuffers(window.window);
 	    	glfwPollEvents();

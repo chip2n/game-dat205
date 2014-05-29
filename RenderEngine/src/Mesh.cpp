@@ -12,7 +12,7 @@ bool Mesh::loadMesh(const string& fileName) {
 
     glGenBuffers(NUM_VBOS, buffers);
 
-    mScene = importer.ReadFile(fileName.c_str(), aiProcess_Triangulate | aiProcess_GenSmoothNormals | aiProcess_FlipUVs);
+    mScene = importer.ReadFile(fileName.c_str(), aiProcess_Triangulate | aiProcess_GenSmoothNormals);
 
     bool ret = false;
 
@@ -473,7 +473,7 @@ void Mesh::render(ShaderProgram &shaderProgram, Camera &camera, Environment &env
     for(uint i = 0; i < env.getLights().size(); i++) {
         std::stringstream sstm;
         sstm << "lightPos[" << i << "]";
-        shaderProgram.setUniform(sstm.str().c_str(), env.getLights()[i].getPosition());
+        shaderProgram.setUniform(sstm.str().c_str(), env.getClosestLights(position)[i].getPosition());
     }
 
     glBindVertexArray(vao);
@@ -571,7 +571,7 @@ void Mesh::render(ShaderProgram &shaderProgram, Camera &camera, Environment &env
     for(uint i = 0; i < env.getLights().size(); i++) {
         std::stringstream sstm;
         sstm << "lightPos[" << i << "]";
-        shaderProgram.setUniform(sstm.str().c_str(), env.getLights()[i].getPosition());
+        shaderProgram.setUniform(sstm.str().c_str(), env.getClosestLights(position)[i].getPosition());
     }
 
 

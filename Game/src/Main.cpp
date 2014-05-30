@@ -327,7 +327,7 @@ int main(int argc, const char *argv[]) {
     playerMesh.loadFromFile("assets/unfinished/skull.dae");
     Animation restAnim = Animation("rest", 9, 249, 333, 12.1f);
     playerMesh.addAnimation(restAnim);
-    Animation runAnim = Animation("run", 296, 320, 320, 9.0f);
+    Animation runAnim = Animation("run", 296, 327, 327, 7.0f);
     playerMesh.addAnimation(runAnim);
 
     Texture lightTexture("assets/unfinished/fire.png");

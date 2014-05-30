@@ -1,4 +1,5 @@
 #include <iostream>
+#include <fstream>
 #include <vector>
 #include <GL/glew.h>
 #include <glm/glm.hpp>
@@ -123,39 +124,52 @@ bool Mesh::initMaterials(const aiScene* pScene, const string& fileName) {
         const aiMaterial* pMaterial = pScene->mMaterials[i];
 
         textures.resize(pScene->mNumMaterials);
+        materials.resize(pScene->mNumMaterials);
         textures[i] = NULL;
 
         if(pMaterial->GetTextureCount(aiTextureType_DIFFUSE) > 0) {
             aiString path;
 
             if(pMaterial->GetTexture(aiTextureType_DIFFUSE, 0, &path, NULL, NULL, NULL, NULL, NULL) == AI_SUCCESS) {
-                string p(path.data);
+                string path2(path.data);
+                string fullPath = constructMaterialString(dir, path2);
 
-                if(p.substr(0,2) == ".\\") {
-                    p = p.substr(2, p.size() - 2);
-                }
-
-                string fullPath = dir + "/" + p;
+                int lastindex = path2.find_last_of("."); 
+                std::string p = path2.substr(0, lastindex) + "_normals.png";
+                string normalPath = constructMaterialString(dir, p);
 
                 textures[i] = new Texture(fullPath);
-
-                /*
-                if(!textures[i]->load()) {
-                    std::cout << "Error loading texture " << fullPath << std::endl;
-                    delete textures[i];
-                    textures[i] = NULL;
-                    ret = false;
-                } else {
-                    std::cout << "Loaded texture " << fullPath << std::endl;
+                Material m;
+                m.texture = new Texture(fullPath);
+                m.normalMap = NULL;
+                if(fileExist(normalPath.c_str())) {
+                    std::cout << "WOOPWOOP - we got a normal map in the house!" << std::endl;
+                    m.normalMap = new Texture(normalPath);
                 }
-                */
+                materials[i] = m;
             }
         }
     }
 
+    std::cout << materials.size() << std::endl;
+    std::cout << textures.size() << std::endl;
+
     return ret;
 }
 
+bool Mesh::fileExist(const char *fileName)
+{
+    std::ifstream infile(fileName);
+    return infile.good();
+}
+
+std::string Mesh::constructMaterialString(std::string &dir, std::string &p) {
+  if(p.substr(0,2) == ".\\") {
+      p = p.substr(2, p.size() - 2);
+  }
+
+  return (dir + "/" + p);
+}
 bool Mesh::initLights(const aiScene* pScene, const string& fileName) {
     for(unsigned int i = 0; i < pScene->mNumLights; i++) {
         aiVector3D position = pScene->mLights[i]->mPosition;
@@ -489,12 +503,22 @@ void Mesh::renderMesh(ShaderProgram &shaderProgram, glm::vec3 position, glm::qua
     modelM = modelM * glm::toMat4(rotation);
     shaderProgram.setUniform("modelMatrix", modelM);
     shaderProgram.setUniform("receivesShadows", true);
+
     for(uint i = 0; i < meshEntries.size(); i++) {
         const uint materialIndex = meshEntries[i].materialIndex;
-        assert(materialIndex < textures.size());
+        assert(materialIndex < materials.size());
 
-        if(textures[materialIndex]) {
-            textures[materialIndex]->bind();
+        if(materials[materialIndex].texture) {
+            materials[materialIndex].texture->bind();
+            if(materials[materialIndex].normalMap) {
+                shaderProgram.setUniform("normalMap", 2);
+                shaderProgram.setUniform("normalMapEnabled", true);
+                glActiveTexture(GL_TEXTURE2);
+                materials[materialIndex].normalMap->bind();
+                glActiveTexture(GL_TEXTURE0);
+            } else {
+                shaderProgram.setUniform("normalMapEnabled", false);
+            }
         }
         
         glDrawElementsBaseVertex(GL_TRIANGLES,
@@ -503,6 +527,7 @@ void Mesh::renderMesh(ShaderProgram &shaderProgram, glm::vec3 position, glm::qua
                                  (void*)(sizeof(uint) * meshEntries[i].baseIndex),
                                  meshEntries[i].baseVertex);
     }
+    shaderProgram.setUniform("normalMapEnabled", false);
     glBindVertexArray(0);
 }
 

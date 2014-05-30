@@ -50,6 +50,11 @@ struct MeshEntry {
     unsigned int materialIndex = 0;
 };
 
+struct Material {
+    Texture *texture;
+    Texture *normalMap;
+};
+
 class Mesh {
   public:
     // mesh loading
@@ -96,6 +101,8 @@ class Mesh {
     uint findScaling(float AnimationTime, const aiNodeAnim* pNodeAnim);
     uint findRotation(float animationTime, const aiNodeAnim* pNodeAnim);
     const aiNodeAnim* findNodeAnim(const aiAnimation* pAnimation, std::string &nodeName);
+    std::string constructMaterialString(std::string &dir, std::string &p);
+    bool fileExist(const char *fileName);
 
     Assimp::Importer importer;
     const aiScene* mScene;
@@ -110,6 +117,7 @@ class Mesh {
     glm::mat4 globalInverseTransform;
     GLuint buffers[NUM_VBOS];
     std::vector<Texture*> textures;
+    std::vector<Material> materials;
     std::vector<glm::vec3> positions;
     std::vector<glm::vec3> normals;
     std::vector<glm::vec2> texCoords;

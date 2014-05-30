@@ -1,5 +1,7 @@
 #include <GL/glew.h>
 #include <iostream>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtc/quaternion.hpp>
 #include "Billboard.h"
 
 GLfloat Billboard::plane[] = {
@@ -39,7 +41,9 @@ void Billboard::render(Camera &camera, Environment &env, ShaderProgram &shaderPr
     shaderProgram.begin();
     shaderProgram.setUniform("modelViewProjectionMatrix", camera.getCombinedMatrix());
     glm::mat4 modelM;
+    glm::quat rot = glm::angleAxis(rotation, camera.position - position);
     modelM = glm::translate(modelM, position);
+    modelM = modelM * glm::toMat4(rot);
     modelM = glm::inverse(glm::lookAt(position, camera.position, glm::vec3(0.0f,1.0f,0.0f)));
     modelM = glm::scale(modelM, glm::vec3(size));
     shaderProgram.setUniform("modelMatrix", modelM);

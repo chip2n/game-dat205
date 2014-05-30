@@ -157,8 +157,7 @@ bool Mesh::initMaterials(const aiScene* pScene, const string& fileName) {
     return ret;
 }
 
-bool Mesh::fileExist(const char *fileName)
-{
+bool Mesh::fileExist(const char *fileName) {
     std::ifstream infile(fileName);
     return infile.good();
 }
@@ -170,6 +169,7 @@ std::string Mesh::constructMaterialString(std::string &dir, std::string &p) {
 
   return (dir + "/" + p);
 }
+
 bool Mesh::initLights(const aiScene* pScene, const string& fileName) {
     for(unsigned int i = 0; i < pScene->mNumLights; i++) {
         aiVector3D position = pScene->mLights[i]->mPosition;
@@ -251,7 +251,6 @@ void Mesh::boneTransform(std::string animName, float timeInSeconds, std::vector<
                                    mScene->mAnimations[0]->mTicksPerSecond : 25.0f;
 
             float timeInTicks = timeInSeconds * ticksPerSecond;
-            //float animationTime = fmod(timeInTicks, mScene->mAnimations[0]->mDuration);
 
             float totalDuration = mScene->mAnimations[0]->mDuration;
             float secondsPerFrame = totalDuration / anim.totalFrames;
@@ -260,10 +259,6 @@ void Mesh::boneTransform(std::string animName, float timeInSeconds, std::vector<
 
             float animationTime = fmod(timeInTicks, totalDuration - (totalDuration - endTime) - startTime);
             animationTime += startTime;
-
-
-            //float animationTime = fmod(timeInTicks, anim.animDuration);
-            //animationTime += anim.timePerFrame * anim.startFrame;
 
             readNodeHierarchy(animationTime, mScene->mRootNode, identity);
 
@@ -285,7 +280,6 @@ void Mesh::readNodeHierarchy(float animationTime, const aiNode* pNode, const glm
 
     const aiAnimation* pAnimation = mScene->mAnimations[0];
 
-    // TODO: Potential bug?
     glm::mat4 nodeTransformation;
     copyAiMatrixToGLM(&(pNode->mTransformation), nodeTransformation);
 
@@ -504,6 +498,14 @@ void Mesh::renderMesh(ShaderProgram &shaderProgram, glm::vec3 position, glm::qua
     shaderProgram.setUniform("modelMatrix", modelM);
     shaderProgram.setUniform("receivesShadows", true);
 
+    if(currentTransforms.size() > 0) {
+        for(uint i = 0; i < currentTransforms.size(); i++) {
+            std::stringstream sstm;
+            sstm << "gBones[" << i << "]";
+            shaderProgram.setUniform(sstm.str().c_str(), currentTransforms[i]);
+        }
+    }
+
     for(uint i = 0; i < meshEntries.size(); i++) {
         const uint materialIndex = meshEntries[i].materialIndex;
         assert(materialIndex < materials.size());
@@ -534,8 +536,12 @@ void Mesh::renderMesh(ShaderProgram &shaderProgram, glm::vec3 position, glm::qua
 void Mesh::shaderSetupLights(ShaderProgram &shaderProgram, std::vector<Light> lights) {
     for(uint i = 0; i < lights.size(); i++) {
         std::stringstream sstm;
-        sstm << "lightPos[" << i << "]";
+        //sstm << "lightPos[" << i << "]";
+        sstm << "lights[" << i << "].position";
         shaderProgram.setUniform(sstm.str().c_str(), lights[i].getPosition());
+        sstm.str("");
+        sstm << "lights[" << i << "].color";
+        shaderProgram.setUniform(sstm.str().c_str(), lights[i].color);
     }
 }
 

@@ -44,9 +44,19 @@ Level* ResourceManager::loadLevel(std::string path) {
             std::stringstream ss;
             ss << "assets/data/gameobjects/" << objects[i]["id"].GetString() << ".json";
             GameObject gameObject = loadGameObject(ss.str());
-            glm::vec3 position = glm::vec3(objects[i]["pos"]["x"].GetInt(), objects[i]["pos"]["y"].GetInt(), objects[i]["pos"]["z"].GetInt());
+            glm::vec3 position = glm::vec3(objects[i]["pos"]["x"].GetDouble(), objects[i]["pos"]["y"].GetDouble(), objects[i]["pos"]["z"].GetDouble());
             gameObject.setPosition(position);
             level.gameObjects.push_back(gameObject);
+        }
+
+        // Loading emitters
+        const rapidjson::Value& emitters = d["emitters"];
+        assert(emitters.IsArray());
+        for(rapidjson::SizeType i = 0; i < emitters.Size(); i++) {
+            glm::vec3 position = glm::vec3(emitters[i]["position"]["x"].GetDouble(), emitters[i]["position"]["y"].GetDouble(), emitters[i]["position"]["z"].GetDouble());
+            ParticleEmitter emitter;
+            emitter.position = position;
+            level.emitters.push_back(emitter);
         }
 
         // Loading lights

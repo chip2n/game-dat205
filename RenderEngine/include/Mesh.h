@@ -81,6 +81,7 @@ class Mesh {
                 Environment &env,
                 glm::vec3 position);
     void render(ShaderProgram &shaderProgram);
+    std::vector<glm::mat4> currentTransforms;
 
   private:
     void renderMesh(ShaderProgram &shaderProgram,

@@ -14,8 +14,8 @@ ShadowMap::ShadowMap(ShaderProgram &program) : shaderProgram(program) {
     glGenTextures(1, &depthTexture);
     glBindTexture(GL_TEXTURE_2D, depthTexture);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT16, SHADOWMAP_WIDTH, SHADOWMAP_HEIGHT, 0, GL_DEPTH_COMPONENT, GL_FLOAT, 0);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
@@ -37,7 +37,7 @@ void ShadowMap::begin() {
     glBindFramebuffer(GL_FRAMEBUFFER, shadowFramebuffer);
     glViewport(0, 0, SHADOWMAP_WIDTH, SHADOWMAP_HEIGHT);
     glDrawBuffer(GL_NONE);
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     shaderProgram.begin();
 }
 
@@ -49,19 +49,20 @@ void ShadowMap::end() {
 }
 
 void ShadowMap::render(Mesh &mesh, glm::vec3 position, glm::quat rotation) {
-    glm::mat4 depthProjectionMatrix = glm::ortho<float>(-10,10,-10,10,-10,20);
+    glm::mat4 depthProjectionMatrix = glm::ortho<float>(-20,20,-20,20,-100,20);
     glm::mat4 depthViewMatrix = glm::lookAt(sunPosition, sunFocus, glm::vec3(0,1,0));
     //glm::mat4 depthModelMatrix = instance.getModelMatrix();
     glm::mat4 depthModelMatrix;
     depthModelMatrix = glm::translate(depthModelMatrix, position) * glm::toMat4(rotation);
     glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
     shaderProgram.setUniform("depthMVP", depthMVP);
+    shaderProgram.setUniform("hasBones", mesh.currentTransforms.size() > 0);
     mesh.render(shaderProgram);
     shaderProgram.begin();
 }
 
 glm::mat4 ShadowMap::getBiasMVP(glm::vec3 position) {
-    glm::mat4 depthProjectionMatrix = glm::ortho<float>(-10,10,-10,10,-10,20);
+    glm::mat4 depthProjectionMatrix = glm::ortho<float>(-20,20,-20,20,-100,20);
     glm::mat4 depthViewMatrix = glm::lookAt(sunPosition, glm::vec3(0,0,0), glm::vec3(0,1,0));
     glm::mat4 depthModelMatrix = glm::mat4(1.0);
     depthModelMatrix = glm::translate(depthModelMatrix, position);

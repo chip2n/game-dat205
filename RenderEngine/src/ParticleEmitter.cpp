@@ -17,6 +17,7 @@ void ParticleEmitter::update(Camera &camera, Environment &env, ShaderProgram &sh
   float spawnY = 2 * (randomFloat() - 0.5f);
   float spawnZ = 2 * (randomFloat() - 0.5f);
   float size = 0.3f * randomFloat();
+  float angle = 360 * randomFloat();
 
   glm::vec3 spawnPosition = radius * glm::vec3(spawnX, spawnY, spawnZ) * 0.1f;
 
@@ -38,6 +39,7 @@ void ParticleEmitter::update(Camera &camera, Environment &env, ShaderProgram &sh
       it->position = it->position + velocity*deltaTime;
       it->cameradistance = glm::length(it->position - camera.position);
       billboard.position = position + it->position;
+      billboard.rotation = angle;
       billboard.size = it->size;
       billboard.render(camera, env, shaderProgram);
       ++it;

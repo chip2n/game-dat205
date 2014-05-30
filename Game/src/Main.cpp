@@ -336,8 +336,6 @@ int main(int argc, const char *argv[]) {
     levelCollision.loadFromFile("assets/unfinished/maze_col.obj");
     ModelInstance levelCollisionInstance(&levelCollision);
 
-    ParticleEmitter emitter;
-    emitter.position = glm::vec3(1.57613, 1.21270, -1.95231);
 
     DirectionalLight llll(glm::vec3(0,0,0), glm::vec3(1,0,0));
     ShadowMap shadowMap(shadowmapShaderProgram);
@@ -385,16 +383,14 @@ int main(int argc, const char *argv[]) {
             playerMesh.boneTransform("rest", (float)restTime, transforms);
         }
 
-        for(uint i = 0; i < transforms.size(); i++) {
-            std::stringstream sstm;
-            sstm << "gBones[" << i << "]";
-            shaderProgram.setUniform(sstm.str().c_str(), transforms[i]);
-        }
+        playerMesh.currentTransforms = transforms;
+
 
         glm::quat coinRotation = glm::angleAxis((float)(150*lastTime), glm::vec3(0,1,0));
 
         shadowMap.begin();
         shadowMap.render(*(l->levelMesh), glm::vec3(0), glm::quat());
+        shadowMap.render(playerMesh, player.getPosition(), player.currentRotation);
         for(unsigned int i = 0; i < l->gameObjects.size(); i++) {
             shadowMap.render(*(l->gameObjects[i].mesh), l->gameObjects[i].getPosition(), coinRotation);
         }
@@ -411,6 +407,11 @@ int main(int argc, const char *argv[]) {
         staticShader.end();
         l->levelMesh->render(staticShader, camera, l->environment);
 
+        shaderProgram.begin();
+        shaderProgram.setUniform("texSampler", 0);
+        shaderProgram.setUniform("shadowMap", 1);
+        shaderProgram.setUniform("depthBiasMVP", depthBiasMVP);
+        shaderProgram.end();
 
 
         playerMesh.render(shaderProgram, camera, l->environment, player.getPosition(), player.up, player.currentRotation);
@@ -419,7 +420,9 @@ int main(int argc, const char *argv[]) {
 
 
         lightTexture.bind();
-        emitter.update(camera, l->environment, staticShader, deltaTime);
+        for(unsigned int i = 0; i < l->emitters.size(); i++) {
+            l->emitters[i].update(camera, l->environment, staticShader, deltaTime);
+        }
         lightTexture.unbind();
 
 

@@ -15,6 +15,7 @@ class Billboard {
         void move(glm::vec3 vec);
         void setSize(float size);
         glm::vec3 position;
+        float rotation;
         float size = -10.0f;
         bool isLightSource = true;
     private:

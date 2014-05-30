@@ -9,12 +9,14 @@ layout(location = 4) in vec4 weights;
 out vec2 texCoords;
 out vec3 worldPosition;
 out vec3 outNormal;
+out vec4 shadowCoord;
 
 const int MAX_BONES = 100;
 
 uniform mat4 modelViewProjectionMatrix;
 uniform mat4 modelMatrix;
 uniform mat4 gBones[MAX_BONES];
+uniform mat4 depthBiasMVP;
 
 void main() {
     mat4 boneTransform = mat4(1.0);
@@ -31,5 +33,6 @@ void main() {
     worldPosition = vec3(modelMatrix * pos);
     outNormal = vec3(modelMatrix * boneTransform * vec4(normal, 0.0));
     texCoords = texCoordsIn;
+    shadowCoord = depthBiasMVP * pos;
 }
 

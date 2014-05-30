@@ -5,6 +5,7 @@
 #include "GameObject.h"
 #include "Light.h"
 #include "Environment.h"
+#include "ParticleEmitter.h"
 
 class Level {
     public:
@@ -13,6 +14,7 @@ class Level {
         Environment environment;
         std::vector<Light> lights;
         std::vector<GameObject> gameObjects;
+        std::vector<ParticleEmitter> emitters;
     private:
 };
 

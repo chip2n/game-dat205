@@ -16,6 +16,7 @@
 *.un~
 *.swp
 *.swo
+tags
 
 # Build directory
 build/

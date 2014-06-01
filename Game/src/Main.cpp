@@ -321,7 +321,6 @@ int main(int argc, const char *argv[]) {
     camera.update();
 
     Level *l = resourceManager.loadLevel("assets/data/levels/maze.json");
-    l = resourceManager.loadLevel("assets/data/levels/maze.json");
 
     Mesh playerMesh;
     playerMesh.loadFromFile("assets/unfinished/skull.dae");

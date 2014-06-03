@@ -13,6 +13,7 @@ class ShadowMap {
         void end();
         void render(Mesh &mesh, glm::vec3 position, glm::quat rotation);
         glm::mat4 getBiasMVP(glm::vec3 position);
+        glm::mat4 getBiasMVP(glm::vec3 position, glm::quat rotation);
         ShaderProgram &shaderProgram;
         GLuint shadowFramebuffer;
         GLuint depthTexture;

@@ -77,3 +77,21 @@ glm::mat4 ShadowMap::getBiasMVP(glm::vec3 position) {
 
     return biasMatrix * depthMVP;
 }
+
+glm::mat4 ShadowMap::getBiasMVP(glm::vec3 position, glm::quat rotation) {
+    glm::mat4 depthProjectionMatrix = glm::ortho<float>(-20,20,-20,20,-100,20);
+    glm::mat4 depthViewMatrix = glm::lookAt(sunPosition, glm::vec3(0,0,0), glm::vec3(0,1,0));
+    glm::mat4 depthModelMatrix = glm::mat4(1.0);
+    depthModelMatrix = glm::translate(depthModelMatrix, position);
+    depthModelMatrix = depthModelMatrix * glm::toMat4(rotation);
+    glm::mat4 depthMVP = depthProjectionMatrix * depthViewMatrix * depthModelMatrix;
+
+    glm::mat4 biasMatrix(
+            0.5, 0.0, 0.0, 0.0,
+            0.0, 0.5, 0.0, 0.0,
+            0.0, 0.0, 0.5, 0.0,
+            0.5, 0.5, 0.5, 1.0
+    );
+
+    return biasMatrix * depthMVP;
+}

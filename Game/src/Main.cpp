@@ -409,6 +409,7 @@ int main(int argc, const char *argv[]) {
         shaderProgram.begin();
         shaderProgram.setUniform("texSampler", 0);
         shaderProgram.setUniform("shadowMap", 1);
+        depthBiasMVP = shadowMap.getBiasMVP(player.getPosition(), player.currentRotation);
         shaderProgram.setUniform("depthBiasMVP", depthBiasMVP);
         shaderProgram.end();
 

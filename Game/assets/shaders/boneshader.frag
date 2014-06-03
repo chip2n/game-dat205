@@ -65,7 +65,7 @@ void main() {
     }
 
     float visibility = 1.0;
-    float bias = 0.0025;
+    float bias = 0.00125;
     for (int i=0;i<poissonDisk.length;i++){
       if ( texture2D( shadowMap, shadowCoord.xy + poissonDisk[i]/700.0 ).z  <  shadowCoord.z-bias ){
         if(receivesShadows) {

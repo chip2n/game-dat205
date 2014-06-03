@@ -62,6 +62,9 @@ vec2 poissonDisk[24] = vec2[](
 
 void main() {
     vec3 normal = outNormal;
+    if(normalMapEnabled) {
+        normal = vec3(texture(normalMap, texCoords));
+    }
     vec4 phong = vec4(0.1, 0.1, 0.1, 1.0);
     float closestLightDistance = -1.0;
     float totalFalloff = 0.0;

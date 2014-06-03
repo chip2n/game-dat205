@@ -27,7 +27,7 @@ class ParticleEmitter {
     std::vector<Particle> particles;
     void update(Camera &camera, Environment &env, ShaderProgram &shaderProgram, float deltaTime);
     glm::vec3 velocity = glm::vec3(0,0.7,0);
-    float radius = 0.7f;
+    float radius = 0.5f;
     float particlesPerSecond = 100;
     glm::vec3 position;
     Billboard billboard;

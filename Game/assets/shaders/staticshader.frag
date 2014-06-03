@@ -62,8 +62,12 @@ vec2 poissonDisk[24] = vec2[](
 
 void main() {
     vec3 normal = outNormal;
+    vec4 ambient = vec4(0.4, 0.4, 0.4, 0.0);
+    if(isLightSource) {
+      ambient = vec4(1.4, 1.4, 1.4, 0.0);
+    }
     if(normalMapEnabled) {
-        normal = vec3(texture(normalMap, texCoords));
+        normal = normalize(vec3(texture(normalMap, texCoords)));
     }
     vec4 phong = vec4(0.1, 0.1, 0.1, 1.0);
     float closestLightDistance = -1.0;
@@ -85,13 +89,9 @@ void main() {
         float theta = dot(normal, lightDir);
 
         vec3 diffuse = vec3(0.6, 0.6, 0.6)*lights[i].color*theta;
-        vec3 ambient = vec3(0.25, 0.25, 0.25);
-        if(isLightSource) {
-          ambient = vec3(0.6, 0.6, 0.6);
-        }
 
         //vec4 phong = vec4(falloff*visibility*(ambient + diffuse), 1.0);
-        phong += vec4(falloff*(ambient+diffuse), 0.0);
+        phong += vec4(falloff*diffuse, 1.0);
     }
 
     float visibility = 1.0;
@@ -111,6 +111,6 @@ void main() {
         heightFalloff = max(0, 1.1 - (pow(worldPosition.y - 1.0, 2))) * heightFalloff;
     }
     vec4 c = texture(texSampler, texCoords);
-    color = vec4(heightFalloff, 1.0) * visibility * phong * c;
+    color = vec4(heightFalloff, 1.0) * visibility * (phong+ambient) * c;
 
 }

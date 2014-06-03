@@ -17,11 +17,31 @@ uniform Light lights[10];
 
 
 
-vec2 poissonDisk[4] = vec2[](
-  vec2( -0.94201624, -0.39906216 ),
-  vec2( 0.94558609, -0.76890725 ),
-  vec2( -0.094184101, -0.92938870 ),
-  vec2( 0.34495938, 0.29387760 )
+vec2 poissonDisk[24] = vec2[](
+  vec2(-0.05389525f, -0.4732464f),
+  vec2(0.3748684f, -0.3568592f),
+  vec2(-0.1696842f, -0.765079f),
+  vec2(-0.3882916f, -0.1095552f),
+  vec2(0.0610783f, -0.9829572f),
+  vec2(0.07125714f, -0.1656173f),
+  vec2(0.3340944f, -0.7217603f),
+  vec2(-0.5315822f, -0.764813f),
+  vec2(-0.5581032f, -0.3972449f),
+  vec2(-0.04634873f, 0.1138161f),
+  vec2(0.7350358f, -0.6742316f),
+  vec2(0.808874f, -0.01892805f),
+  vec2(0.3973725f, 0.1824621f),
+  vec2(0.7849492f, -0.3197357f),
+  vec2(-0.6595317f, 0.07930014f),
+  vec2(-0.9253961f, -0.1296234f),
+  vec2(-0.2353496f, 0.3982215f),
+  vec2(-0.6499953f, 0.5391897f),
+  vec2(0.2311781f, 0.6277929f),
+  vec2(-0.2789708f, 0.7210696f),
+  vec2(0.7387629f, 0.3382523f),
+  vec2(0.5726824f, 0.7927272f),
+  vec2(-0.8975564f, 0.3412585f),
+  vec2(0.06870192f, 0.8815266f)
 );
 
 void main() {
@@ -31,7 +51,7 @@ void main() {
         if(lights[i].position == vec3(0)) {
             continue;
         }
-        float falloff = 1/(pow(length((lights[i].position - worldPosition)), 1));
+        float falloff = 1/(pow(length((lights[i].position - worldPosition)), 2));
         totalFalloff += falloff;
         if(falloff < 0.0001) break;
         vec3 lightDir = normalize(lights[i].position - worldPosition);
@@ -46,10 +66,10 @@ void main() {
 
     float visibility = 1.0;
     float bias = 0.0025;
-    for (int i=0;i<4;i++){
+    for (int i=0;i<poissonDisk.length;i++){
       if ( texture2D( shadowMap, shadowCoord.xy + poissonDisk[i]/700.0 ).z  <  shadowCoord.z-bias ){
         if(receivesShadows) {
-          visibility -= 0.1;
+          visibility -= 0.02;
         }
       }
     }

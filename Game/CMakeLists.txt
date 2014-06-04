@@ -29,7 +29,12 @@ set(GAME_SRCS
 add_executable(${PROJECT_NAME} ${GAME_SRCS})
 target_link_libraries(${PROJECT_NAME} ${RENDERENGINE})
 
-# Copy assets
-add_custom_command(TARGET ${PROJECT_NAME} PRE_BUILD
-                   COMMAND ${CMAKE_COMMAND} -E copy_directory
-                       ${CMAKE_CURRENT_SOURCE_DIR}/assets $<TARGET_FILE_DIR:${PROJECT_NAME}>/assets)
+add_custom_command(
+  OUTPUT assets_synced
+  COMMAND rsync -r "${CMAKE_CURRENT_SOURCE_DIR}/assets" "${PROJECT_BINARY_DIR}"
+  COMMENT "Syncing assets... ${PROJECT_BINARY_DIR}>")
+
+add_custom_target(
+  Assets ALL
+  DEPENDS assets_synced
+)

@@ -140,19 +140,15 @@ bool Mesh::initMaterials(const aiScene* pScene, const string& fileName) {
 
                 textures[i] = new Texture(fullPath);
                 Material m;
-                m.texture = new Texture(fullPath);
+                m.texture = textures[i];
                 m.normalMap = NULL;
                 if(fileExist(normalPath.c_str())) {
-                    std::cout << "WOOPWOOP - we got a normal map in the house!" << std::endl;
                     m.normalMap = new Texture(normalPath);
                 }
                 materials[i] = m;
             }
         }
     }
-
-    std::cout << materials.size() << std::endl;
-    std::cout << textures.size() << std::endl;
 
     return ret;
 }

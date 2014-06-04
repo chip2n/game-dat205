@@ -307,6 +307,7 @@ int main(int argc, const char *argv[]) {
     // Set up all them callbacks, yo
     glfwSetCursorPosCallback(window.window, mouse_callback);
     glfwSetWindowSizeCallback(window.window, resize_callback);
+    glfwSwapInterval(1);
 
     // Initiate GLEW or crash everything if failure, yo
     if(glewInit() != GLEW_OK) {

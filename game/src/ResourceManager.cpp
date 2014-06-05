@@ -65,7 +65,7 @@ Level* ResourceManager::loadLevel(std::string path) {
         for(rapidjson::SizeType i = 0; i < l.Size(); i++) {
             glm::vec3 position = glm::vec3(l[i]["position"]["x"].GetDouble(), l[i]["position"]["y"].GetDouble(), l[i]["position"]["z"].GetDouble());
             Light light(position);
-            light.intensity = l[i]["intensity"].GetDouble();
+            //light.intensity = l[i]["intensity"].GetDouble();
             level.environment.addLight(light);
         }
         levels.insert(std::pair<std::string, Level>(path, level));

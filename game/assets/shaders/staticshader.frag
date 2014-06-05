@@ -11,27 +11,19 @@ uniform bool normalMapEnabled;
 uniform bool receivesShadows;
 uniform bool isLightSource;
 
+struct Material {
+    vec3 diffuseColor;
+    vec3 specularColor;
+};
+
 struct Light {
     vec3 position;
     vec3 color;
+    float intensity;
 };
+
 uniform Light lights[10];
 
-//vec2 poissonDisk[4] = vec2[](
-//  vec2( -0.94201624, -0.39906216 ),
-//  vec2( 0.94558609, -0.76890725 ),
-//  vec2( -0.094184101, -0.92938870 ),
-//  vec2( 0.34495938, 0.29387760 )
-//);
-//vec2 poissonDisk[7] = vec2[](
-//  vec2(0.9781557f, 0.08678176f),
-//  vec2(0.2422839f, 0.8379077f),
-//  vec2(0.05205152f, 0.1375587f),
-//  vec2(0.3313435f, -0.4023863f),
-//  vec2(-0.6087734f, 0.06514339f),
-//  vec2(-0.5291746f, 0.674904f),
-//  vec2(-0.5743152f, -0.7018966f)
-//);
 vec2 poissonDisk[24] = vec2[](
   vec2(-0.05389525f, -0.4732464f),
   vec2(0.3748684f, -0.3568592f),
@@ -88,7 +80,7 @@ void main() {
         vec3 lightDir = normalize(lights[i].position - worldPosition);
         float theta = dot(normal, lightDir);
 
-        vec3 diffuse = vec3(0.6, 0.6, 0.6)*lights[i].color*theta;
+        vec3 diffuse = vec3(0.6, 0.6, 0.6)*lights[i].color*theta*lights[i].intensity;
 
         //vec4 phong = vec4(falloff*visibility*(ambient + diffuse), 1.0);
         phong += vec4(falloff*diffuse, 1.0);

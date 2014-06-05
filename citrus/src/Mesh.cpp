@@ -495,12 +495,16 @@ void Mesh::renderMesh(ShaderProgram &shaderProgram, glm::vec3 position, glm::qua
     shaderProgram.setUniform("receivesShadows", true);
 
     if(currentTransforms.size() > 0) {
+        shaderProgram.setUniform("useBones", true);
         for(uint i = 0; i < currentTransforms.size(); i++) {
             std::stringstream sstm;
             sstm << "gBones[" << i << "]";
             shaderProgram.setUniform(sstm.str().c_str(), currentTransforms[i]);
         }
+    } else {
+        shaderProgram.setUniform("useBones", false);
     }
+        
 
     for(uint i = 0; i < meshEntries.size(); i++) {
         const uint materialIndex = meshEntries[i].materialIndex;
@@ -538,6 +542,9 @@ void Mesh::shaderSetupLights(ShaderProgram &shaderProgram, std::vector<Light> li
         sstm.str("");
         sstm << "lights[" << i << "].color";
         shaderProgram.setUniform(sstm.str().c_str(), lights[i].color);
+        sstm.str("");
+        sstm << "lights[" << i << "].intensity";
+        shaderProgram.setUniform(sstm.str().c_str(), lights[i].intensity);
     }
 }
 

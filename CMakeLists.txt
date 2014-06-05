@@ -3,5 +3,11 @@ project(root)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x -g -Wall")
 
-add_subdirectory(RenderEngine)
-add_subdirectory(Game)
+set(RENDERENGINE "citrus")
+set(GAME "game")
+set(TOOLS_DIR "tools")
+set(EDITOR "citrus-editor")
+
+add_subdirectory(${RENDERENGINE})
+add_subdirectory(${GAME})
+add_subdirectory(${TOOLS_DIR}/${EDITOR})

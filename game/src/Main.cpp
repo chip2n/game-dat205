@@ -314,9 +314,10 @@ int main(int argc, const char *argv[]) {
         exit(EXIT_FAILURE);
     }
 
-    ShaderProgram shaderProgram("assets/shaders/boneshader.vert", "assets/shaders/boneshader.frag");
+    ShaderProgram shaderProgram("assets/shaders/staticshader.vert", "assets/shaders/staticshader.frag");
     ShaderProgram staticShader("assets/shaders/staticshader.vert", "assets/shaders/staticshader.frag");
     ShaderProgram shadowmapShaderProgram("assets/shaders/shadowmap.vert", "assets/shaders/shadowmap.frag");
+    ShaderProgram ssaoShader("assets/shaders/saoo.vert", "assets/shaders/ssao.frag");
 
     camera.setPosition(glm::vec3(0,5,4));
     camera.update();
@@ -438,9 +439,6 @@ int main(int argc, const char *argv[]) {
         staticShader.begin();
         staticShader.setUniform("isLightSource", false);
         staticShader.end();
-
-
-
 
 		    glfwSwapBuffers(window.window);
 	    	glfwPollEvents();

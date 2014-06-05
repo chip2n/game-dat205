@@ -53,7 +53,7 @@ void ShaderProgram::compileShader(GLuint shader, std::string shaderCode) {
         glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
         std::vector<char> shaderErrorMessage(infoLogLength);
         glGetShaderInfoLog(shader, infoLogLength, NULL, &shaderErrorMessage[0]);
-        throw ShaderException(std::string("Error compiling vertex shader: ") + &shaderErrorMessage[0]);
+        throw ShaderException(std::string("Error compiling shader: ") + &shaderErrorMessage[0]);
     }
 }
 
@@ -114,4 +114,12 @@ void ShaderProgram::setUniform(const char* location, int value) {
     }
     GLuint m = glGetUniformLocation(program, location);
     glUniform1i(m, value);
+}
+
+void ShaderProgram::setUniform(const char* location, float value) {
+    if(!active) {
+        throw ShaderException("You need to call ShaderProgram.begin() before assigning uniforms.");
+    }
+    GLuint m = glGetUniformLocation(program, location);
+    glUniform1f(m, value);
 }

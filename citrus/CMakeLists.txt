@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(RenderEngine)
+project(citrus)
 
 # Set the external library folder
 set(PROJECT_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs)

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 
-project(Game)
+project(${GAME})
 
 # Set the external library folder
 set(PROJECT_LIB_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs)
@@ -12,10 +12,8 @@ set(PROJECT_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 # Set the include folders
 include_directories(${PROJECT_INCLUDE_DIR})
-include_directories(${CMAKE_SOURCE_DIR}/RenderEngine/include)
+include_directories(${CMAKE_SOURCE_DIR}/${RENDERENGINE}/include)
 # include_directories(${OPENGL_INCLUDE_DIRS})
-
-set(RENDERENGINE "RenderEngine")
 
 set(GAME_SRCS 
     ${PROJECT_SOURCE_DIR}/Main.cpp

@@ -10,7 +10,7 @@ class Light {
         glm::vec3 getPosition();
         glm::vec3 position;
         glm::vec3 color = glm::vec3(1,0.5,0);
-        float intensity;
+        float intensity = 1.0;
     private:
 };
 

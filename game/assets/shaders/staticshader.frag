@@ -3,7 +3,9 @@ in vec2 texCoords;
 in vec3 worldPosition;
 in vec3 outNormal;
 in vec4 shadowCoord;
+
 out vec4 color;
+
 uniform sampler2D texSampler;
 uniform sampler2D shadowMap;
 uniform sampler2D normalMap;
